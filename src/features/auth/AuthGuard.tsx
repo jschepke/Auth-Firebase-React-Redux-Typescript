@@ -1,5 +1,6 @@
 import { Box, LinearProgress } from "@mui/material";
 import { Link } from "react-router-dom";
+
 import useAuth from "../../hooks/useAuth";
 
 export const AuthGuard = ({ children }: { children: JSX.Element }) => {

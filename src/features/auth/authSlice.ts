@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+
 import { auth } from "../../services/firebase/firebase";
 import { AppDispatch, RootState } from "../../store";
 import {
@@ -155,7 +156,7 @@ export const logOut = createAsyncThunk("auth/logout", async () => {
   await signOut(auth);
 });
 
-//# Auth Slice _________________________________________________________________
+//# -------------------------------- AUTH SLICE ------------------------------*/
 
 const authSlice = createSlice({
   name: "auth",
@@ -210,6 +211,7 @@ const authSlice = createSlice({
     },
     // # This reducer is for test purposes only.
     // # All loadingStatus changes are handled by other reducers.
+
     setLoadingStatus: (
       state,
       action: PayloadAction<AuthState["loadingStatus"]>

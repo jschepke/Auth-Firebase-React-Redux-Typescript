@@ -1,4 +1,5 @@
 import { Box, Grid } from "@mui/material";
+
 import { AuthCard } from "./AuthCard";
 import { AuthForm } from "./AuthForm";
 
@@ -24,8 +25,8 @@ const AuthPage = ({ variant }: AuthPageProps) => {
         </Grid>
         <Grid
           item
-          xs={12}
           container
+          xs={12}
           justifyContent="center"
           alignItems="center"
         >

@@ -1,13 +1,6 @@
-import { FormEvent, MouseEvent, useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-
-// project imports
-import {
-  logInWithEmailAndPassword,
-  registerWithEmailAndPassword,
-} from "../../features/auth/authSlice";
-import { useAppDispatch } from "../../hooks/redux-hooks";
-
+// assets
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 // material-ui
 import {
   Box,
@@ -23,17 +16,20 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-
-// assets
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-
+import { FormEvent, MouseEvent, useState } from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 // utilities
 import { z } from "zod";
 
+// project imports
+import {
+  logInWithEmailAndPassword,
+  registerWithEmailAndPassword,
+} from "../../features/auth/authSlice";
+import { useAppDispatch } from "../../hooks/redux-hooks";
+import useAuth from "../../hooks/useAuth";
 // types
 import type { AuthPageProps } from "./AuthPage";
-import { LoadingButton } from "@mui/lab";
-import useAuth from "../../hooks/useAuth";
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
   const loadingStatus = useAuth().loadingStatus;
@@ -160,7 +156,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   };
 
   return (
-    <Box component="form" noValidate onSubmit={handleFormSubmit}>
+    <Box noValidate component="form" onSubmit={handleFormSubmit}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Box sx={{ pt: 1, pb: 3 }}>
@@ -171,7 +167,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Button variant="contained" size="large" fullWidth>
+          <Button fullWidth variant="contained" size="large">
             Google
           </Button>
           {/* <FirebaseSocial /> */}
@@ -185,10 +181,10 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
         <Grid item xs={12}>
           <TextField
+            fullWidth
             label="Email"
             type="email"
             placeholder="Enter email address"
-            fullWidth
             margin="normal"
             error={Boolean(errorMessages.email)}
             helperText={errorMessages.email || false}
@@ -202,18 +198,13 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
           />
 
           <TextField
+            fullWidth
             label="Password"
             type={showPassword ? "text" : "password"}
             placeholder="Enter password"
-            fullWidth
             margin="normal"
             name="password"
             value={password}
-            onChange={(event) => {
-              const value = event.target.value;
-              setPassword(value);
-              validatePassword(value);
-            }}
             error={Boolean(errorMessages.password)}
             helperText={errorMessages.password || false}
             InputProps={{
@@ -221,14 +212,19 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="toggle password visibility"
+                    edge="end"
                     onClick={handleClickShowPassword}
                     onMouseDown={handleMouseDownPassword}
-                    edge="end"
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
+            }}
+            onChange={(event) => {
+              const value = event.target.value;
+              setPassword(value);
+              validatePassword(value);
             }}
           />
         </Grid>
@@ -244,10 +240,10 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
                 control={
                   <Checkbox
                     checked={checked}
-                    onChange={(event) => setChecked(event.target.checked)}
                     name="checked"
                     color="primary"
                     size="small"
+                    onChange={(event) => setChecked(event.target.checked)}
                   />
                 }
                 label={<Typography variant="body2">Keep me sign in</Typography>}
