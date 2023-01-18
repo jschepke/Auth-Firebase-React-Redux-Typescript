@@ -1,7 +1,5 @@
-// assets
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
-// material-ui
 import {
   Box,
   Button,
@@ -16,19 +14,16 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { FormEvent, MouseEvent, useState } from "react";
+import { type FormEvent, type MouseEvent, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-// utilities
 import { z } from "zod";
 
-// project imports
 import {
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
 } from "../../features/auth/authSlice";
 import { useAppDispatch } from "../../hooks/redux-hooks";
 import useAuth from "../../hooks/useAuth";
-// types
 import type { AuthPageProps } from "./AuthPage";
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
@@ -107,8 +102,33 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     }
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const authHandler = async () => {
+      try {
+        if (variant === "login") {
+          await dispatch(
+            logInWithEmailAndPassword({ email, password })
+          ).unwrap();
+          handleFormReset();
+          navigate("/app");
+        }
+        if (variant === "register") {
+          await dispatch(
+            registerWithEmailAndPassword({ email, password })
+          ).unwrap();
+          handleFormReset();
+          navigate("/app");
+        }
+      } catch (error) {
+        if (typeof error === "string") {
+          setErrorMessages({ ...errorMessages, auth: error });
+          return;
+        }
+      }
+    };
+
     if (
       !email ||
       !password ||
@@ -119,25 +139,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
       validatePassword(password);
       return;
     }
-    try {
-      if (variant === "login") {
-        await dispatch(logInWithEmailAndPassword({ email, password })).unwrap();
-        handleFormReset();
-        navigate("/app");
-      }
-      if (variant === "register") {
-        await dispatch(
-          registerWithEmailAndPassword({ email, password })
-        ).unwrap();
-        handleFormReset();
-        navigate("/app");
-      }
-    } catch (error) {
-      if (typeof error === "string") {
-        setErrorMessages({ ...errorMessages, auth: error });
-        return;
-      }
-    }
+    void authHandler();
   };
 
   const handleClickShowPassword = () => {
