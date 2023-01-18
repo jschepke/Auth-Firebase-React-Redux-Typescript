@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "auth": "auth-react-redux-typescript"
+  },
+  "targets": {},
+  "etags": {}
+}
