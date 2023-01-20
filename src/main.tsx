@@ -9,17 +9,18 @@ import App from "./App";
 import { AuthLoadingCheck } from "./features/auth/AuthLoadingCheck";
 import LoginPage from "./pages/authentication/AuthPage";
 import ErrorPage from "./pages/error-page";
+import { paths } from "./routes/paths";
 import Root from "./routes/Root";
 import { store } from "./store";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: paths.home,
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "app",
+        path: paths.app,
         element: <App />,
       },
       {
