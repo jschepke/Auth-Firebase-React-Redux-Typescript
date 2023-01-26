@@ -1,5 +1,5 @@
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
@@ -13,18 +13,18 @@ import {
   Stack,
   TextField,
   Typography,
-} from "@mui/material";
-import { type FormEvent, type MouseEvent, useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { z } from "zod";
+} from '@mui/material';
+import { type FormEvent, type MouseEvent, useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
 import {
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
-} from "../../features/auth/authSlice";
-import { useAppDispatch } from "../../hooks/redux-hooks";
-import useAuth from "../../hooks/useAuth";
-import type { AuthPageProps } from "./AuthPage";
+} from '../../features/auth/authSlice';
+import { useAppDispatch } from '../../hooks/redux-hooks';
+import useAuth from '../../hooks/useAuth';
+import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
   const loadingStatus = useAuth().loadingStatus;
@@ -33,8 +33,8 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
   const [checked, setChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMessages, setErrorMessages] = useState<{
     email: null | string;
     password: null | string;
@@ -43,17 +43,17 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
   const variantSpecs = {
     login: {
-      title: "Login",
+      title: 'Login',
       redirection: {
         text: "Don't have an account? Sign up here",
-        path: "/register",
+        path: '/register',
       },
     },
     register: {
-      title: "Sign up",
+      title: 'Sign up',
       redirection: {
-        text: "Already have an account? Login here",
-        path: "/login",
+        text: 'Already have an account? Login here',
+        path: '/login',
       },
     },
   };
@@ -63,7 +63,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     try {
       validationEmail.parse(value);
       setErrorMessages((prevState) => ({
-        email: "",
+        email: '',
         password: prevState.password,
         auth: prevState.auth,
       }));
@@ -86,7 +86,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
       validationPassword.parse(value);
       setErrorMessages((prevState) => ({
         email: prevState.email,
-        password: "",
+        password: '',
         auth: prevState.auth,
       }));
     } catch (error) {
@@ -107,22 +107,22 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
     const authHandler = async () => {
       try {
-        if (variant === "login") {
+        if (variant === 'login') {
           await dispatch(
             logInWithEmailAndPassword({ email, password })
           ).unwrap();
           handleFormReset();
-          navigate("/app");
+          navigate('/app');
         }
-        if (variant === "register") {
+        if (variant === 'register') {
           await dispatch(
             registerWithEmailAndPassword({ email, password })
           ).unwrap();
           handleFormReset();
-          navigate("/app");
+          navigate('/app');
         }
       } catch (error) {
-        if (typeof error === "string") {
+        if (typeof error === 'string') {
           setErrorMessages({ ...errorMessages, auth: error });
           return;
         }
@@ -151,8 +151,8 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   };
 
   const handleFormReset = () => {
-    setEmail("");
-    setPassword("");
+    setEmail('');
+    setPassword('');
     setErrorMessages({ email: null, password: null, auth: null });
     setShowPassword(false);
   };
@@ -162,7 +162,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Box sx={{ pt: 1, pb: 3 }}>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
               {variantSpecs[variant].title}
             </Typography>
           </Box>
@@ -202,7 +202,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
           <TextField
             fullWidth
             label="Password"
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? 'text' : 'password'}
             placeholder="Enter password"
             margin="normal"
             name="password"
@@ -230,7 +230,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
             }}
           />
         </Grid>
-        {variant === "login" && (
+        {variant === 'login' && (
           <Grid item xs={12} sx={{ mt: 0 }}>
             <Stack
               direction="row"
@@ -263,7 +263,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
           </Grid>
         )}
 
-        {variant === "register" && (
+        {variant === 'register' && (
           <Grid item xs={12} mb={1}>
             <Stack>
               <Typography variant="caption" textAlign="center">
@@ -281,8 +281,8 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
         )}
 
         {errorMessages.auth && (
-          <Grid item xs={12} sx={{ textAlign: "center" }}>
-            <Typography variant="body1" sx={{ color: "error.main" }}>
+          <Grid item xs={12} sx={{ textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ color: 'error.main' }}>
               {errorMessages.auth}
             </Typography>
           </Grid>
@@ -296,7 +296,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
             type="submit"
             variant="contained"
             color="primary"
-            loading={loadingStatus === "pending"}
+            loading={loadingStatus === 'pending'}
           >
             {variantSpecs[variant].title}
           </LoadingButton>
@@ -309,7 +309,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
               to={variantSpecs[variant].redirection.path}
               variant="body2"
               color="primary"
-              sx={{ textDecoration: "none" }}
+              sx={{ textDecoration: 'none' }}
               textAlign="center"
             >
               {variantSpecs[variant].redirection.text}

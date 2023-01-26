@@ -1,13 +1,13 @@
-import { FirebaseOptions, initializeApp } from "firebase/app";
-import type { User } from "firebase/auth";
-import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { FirebaseOptions, initializeApp } from 'firebase/app';
+import type { User } from 'firebase/auth';
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
 import {
   collection,
   connectFirestoreEmulator,
   getFirestore,
   query,
   where,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -30,13 +30,13 @@ const firestore = getFirestore();
 const firestoreQueries = {
   currentUserEvents: (user: User) => {
     return query(
-      collection(firestore, "events"),
-      where("userID", "==", user.uid)
+      collection(firestore, 'events'),
+      where('userID', '==', user.uid)
     );
   },
 };
 
-connectAuthEmulator(auth, "http://localhost:9099");
-connectFirestoreEmulator(firestore, "localhost", 8080);
+connectAuthEmulator(auth, 'http://localhost:9099');
+connectFirestoreEmulator(firestore, 'localhost', 8080);
 
 export { auth, firestore, firestoreQueries };

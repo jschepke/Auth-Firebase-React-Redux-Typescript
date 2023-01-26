@@ -1,9 +1,9 @@
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useMemo } from "react";
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useMemo } from 'react';
 
-import { createUserInfo, setUserInfo } from "../features/auth/authSlice";
-import { auth } from "../services/firebase/firebase";
-import { useAppDispatch, useAppSelector } from "./redux-hooks";
+import { createUserInfo, setUserInfo } from '../features/auth/authSlice';
+import { auth } from '../services/firebase/firebase';
+import { useAppDispatch, useAppSelector } from './redux-hooks';
 
 const useAuth = () => {
   const user = useAppSelector((state) => state.auth.user);

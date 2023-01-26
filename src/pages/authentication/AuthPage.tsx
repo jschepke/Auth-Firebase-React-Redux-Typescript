@@ -1,27 +1,27 @@
-import { Box, Grid } from "@mui/material";
+import { Box, Grid } from '@mui/material';
 
-import { AuthCard } from "./AuthCard";
-import { AuthForm } from "./AuthForm";
+import { AuthCard } from './AuthCard';
+import { AuthForm } from './AuthForm';
 
-export type AuthPageVariant = "login" | "register";
+export type AuthPageVariant = 'login' | 'register';
 
 export interface AuthPageProps {
-  variant: "login" | "register";
+  variant: 'login' | 'register';
 }
 
 const AuthPage = ({ variant }: AuthPageProps) => {
   return (
-    <Box sx={{ minHeight: "100vh" }}>
+    <Box sx={{ minHeight: '100vh' }}>
       <Grid
         container
         direction="column"
         justifyContent="space-between"
         sx={{
-          minHeight: "100vh",
+          minHeight: '100vh',
         }}
       >
         <Grid item xs={12}>
-          <Box sx={{ height: "50px" }}>Top bar</Box>
+          <Box sx={{ height: '50px' }}>Top bar</Box>
         </Grid>
         <Grid
           item
@@ -35,7 +35,7 @@ const AuthPage = ({ variant }: AuthPageProps) => {
           </AuthCard>
         </Grid>
         <Grid item xs={12}>
-          <Box sx={{ height: "50px" }}>footer</Box>
+          <Box sx={{ height: '50px' }}>footer</Box>
         </Grid>
       </Grid>
     </Box>

@@ -1,4 +1,4 @@
-import { AuthGuard } from "./features/auth/AuthGuard";
+import { AuthGuard } from './features/auth/AuthGuard';
 
 function App() {
   return (

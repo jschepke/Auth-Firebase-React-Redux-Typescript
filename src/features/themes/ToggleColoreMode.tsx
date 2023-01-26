@@ -1,7 +1,7 @@
-import { Button } from "@mui/material";
+import { Button } from '@mui/material';
 
-import { useAppDispatch } from "../../hooks/redux-hooks";
-import { toggleColorMode } from "./themeSlice";
+import { useAppDispatch } from '../../hooks/redux-hooks';
+import { toggleColorMode } from './themeSlice';
 
 const ToggleColorMode = () => {
   const dispatch = useAppDispatch();

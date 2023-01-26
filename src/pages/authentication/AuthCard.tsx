@@ -1,4 +1,4 @@
-import { Box, Card } from "@mui/material";
+import { Box, Card } from '@mui/material';
 
 export const AuthCard = ({ children }: { children: JSX.Element }) => {
   return (

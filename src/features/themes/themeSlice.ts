@@ -1,20 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
-import { RootState } from "../../store";
+import { RootState } from '../../store';
 
 interface ThemeState {
-  colorMode: "dark" | "light";
+  colorMode: 'dark' | 'light';
 }
 
 const themeSlice = createSlice({
-  name: "theme",
-  initialState: { colorMode: "dark" } as ThemeState,
+  name: 'theme',
+  initialState: { colorMode: 'dark' } as ThemeState,
   reducers: {
     toggleColorMode: (state) => {
-      if (state.colorMode === "light") {
-        state.colorMode = "dark";
+      if (state.colorMode === 'light') {
+        state.colorMode = 'dark';
       } else {
-        state.colorMode = "light";
+        state.colorMode = 'light';
       }
     },
   },

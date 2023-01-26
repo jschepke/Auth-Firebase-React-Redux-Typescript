@@ -1,4 +1,4 @@
-import { AuthErrorCodes } from "firebase/auth";
+import { AuthErrorCodes } from 'firebase/auth';
 
 const selectedAuthErrorCodes = [
   AuthErrorCodes.EMAIL_EXISTS,
@@ -21,31 +21,31 @@ export const errorMessages: Record<
   SelectedAuthErrorCodes,
   { en: string; pl: string }
 > = {
-  "auth/wrong-password": {
-    en: "Wrong password",
-    pl: "Hasło nieprawidłowe",
+  'auth/wrong-password': {
+    en: 'Wrong password',
+    pl: 'Hasło nieprawidłowe',
   },
-  "auth/user-not-found": {
-    en: "There is no account for this email address. Register",
-    pl: "Brak konta dla tego adresu mailowego. Zarejestruj się",
+  'auth/user-not-found': {
+    en: 'There is no account for this email address. Register',
+    pl: 'Brak konta dla tego adresu mailowego. Zarejestruj się',
   },
-  "auth/network-request-failed": {
+  'auth/network-request-failed': {
     pl: `Jesteś offline lub występuje problem z twoim
         połączeniem internetowym`,
     en: `You are offline or there is some problem
         with your internet connection`,
   },
-  "auth/email-already-in-use": {
+  'auth/email-already-in-use': {
     en: `An account for this email address already exists. Login.`,
-    pl: "Konto dla tego adresu juz istnieje. Zaloguj się",
+    pl: 'Konto dla tego adresu juz istnieje. Zaloguj się',
   },
-  "auth/weak-password": {
-    en: "Password needs to contain ...",
-    pl: "Hasło musi składać się z ...",
+  'auth/weak-password': {
+    en: 'Password needs to contain ...',
+    pl: 'Hasło musi składać się z ...',
   },
 };
 
 export const fallbackErrorMessage = {
-  en: "Something went wrong",
-  pl: "Coś poszło nie tak",
+  en: 'Something went wrong',
+  pl: 'Coś poszło nie tak',
 };

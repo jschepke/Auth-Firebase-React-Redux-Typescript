@@ -1,10 +1,10 @@
-import { Link, Stack } from "@mui/material";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import { Link as RouterLink, useMatch } from "react-router-dom";
+import { Link, Stack } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import { Link as RouterLink, useMatch } from 'react-router-dom';
 
-import { paths } from "../routes/paths";
+import { paths } from '../routes/paths';
 
 const NavLink = ({ path }: { path: string }) => {
   const match = useMatch(path);
@@ -14,9 +14,9 @@ const NavLink = ({ path }: { path: string }) => {
       underline="hover"
       component={RouterLink}
       to={path}
-      color={match ? "primary" : "inherit"}
+      color={match ? 'primary' : 'inherit'}
     >
-      {path === "/" ? "home" : path}
+      {path === '/' ? 'home' : path}
     </Link>
   );
 };
