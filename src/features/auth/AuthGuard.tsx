@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 
 import useAuth from '../../hooks/useAuth';
 
-export const AuthGuard = ({ children }: { children: JSX.Element }) => {
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+export const AuthGuard = ({ children }: AuthGuardProps) => {
   const { user, loadingStatus } = useAuth();
 
   if (loadingStatus === 'unset') {
@@ -23,5 +27,5 @@ export const AuthGuard = ({ children }: { children: JSX.Element }) => {
     );
   }
 
-  return children;
+  return <>{children}</>;
 };

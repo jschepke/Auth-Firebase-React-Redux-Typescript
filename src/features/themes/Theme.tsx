@@ -4,7 +4,11 @@ import { useSelector } from 'react-redux';
 
 import { selectColorMode } from './themeSlice';
 
-function Theme({ children }: { children: JSX.Element }) {
+interface ThemeProps {
+  children: React.ReactNode;
+}
+
+function Theme({ children }: ThemeProps) {
   const colorMode = useSelector(selectColorMode);
 
   const theme = createTheme({

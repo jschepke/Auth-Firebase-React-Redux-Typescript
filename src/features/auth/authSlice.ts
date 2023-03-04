@@ -12,10 +12,12 @@ import { AppDispatch, RootState } from '../../store';
 import {
   errorMessages,
   fallbackErrorMessage,
-  isSelectedAuthErrorCode,
+  isHandledAuthErrorCode,
 } from './errorCodes';
 
-// # types _____________________________________________________________________
+/**------------------------------------------------------------------------
+ *#                                TYPES
+ *------------------------------------------------------------------------**/
 
 export interface AuthState {
   user: UserInfo | null;
@@ -40,9 +42,16 @@ export type UserInfo = Pick<
   | 'phoneNumber'
 >;
 
-// # helpers ___________________________________________________________________
+/**------------------------------------------------------------------------
+ *#                                HELPERS
+ *------------------------------------------------------------------------**/
 
-export const createUserInfo = (user: User): UserInfo => {
+/**
+ * Gets essential info from Firebase `User` object and returns serialized `UserInfo` object.
+ * @param user - `User` object from Firebase-Auth
+ * @returns Serialized object with essential user info
+ */
+export const getUserInfo = (user: User): UserInfo => {
   return {
     email: user.email,
     emailVerified: user.emailVerified,
@@ -54,8 +63,11 @@ export const createUserInfo = (user: User): UserInfo => {
   };
 };
 
-// # async thunks ______________________________________________________________
+/**------------------------------------------------------------------------
+ *#                           ASYNC THUNKS
+ *------------------------------------------------------------------------**/
 
+/*------------------ LOGIN WITH EMAIL AND PASSWORD THUNK -----------------*/
 export const logInWithEmailAndPassword = createAsyncThunk<
   UserInfo,
   EmailAndPassword,
@@ -82,20 +94,20 @@ export const logInWithEmailAndPassword = createAsyncThunk<
       );
 
       const { user } = userCredentials;
-      return createUserInfo(user);
+      return getUserInfo(user);
     } catch (error) {
       const authError = error as AuthError;
       const { code, name, message, customData, cause, stack } = authError;
       console.log({ code, name, message, customData, cause, stack });
 
-      if (isSelectedAuthErrorCode(code)) {
+      if (isHandledAuthErrorCode(code)) {
         return rejectWithValue(errorMessages[code][thunkApi.getState().lang]);
       }
 
       return rejectWithValue(fallbackErrorMessage[thunkApi.getState().lang]);
     }
   },
-  // # canceling before entering the thunk
+  // This cancels before entering the thunk
   {
     condition: (_, { getState }) => {
       const { loadingStatus } = getState().auth;
@@ -106,6 +118,7 @@ export const logInWithEmailAndPassword = createAsyncThunk<
   }
 );
 
+/*------------------ REGISTER WITH EMAIL AND PASSWORD THUNK -----------------*/
 export const registerWithEmailAndPassword = createAsyncThunk<
   UserInfo,
   EmailAndPassword,
@@ -126,13 +139,13 @@ export const registerWithEmailAndPassword = createAsyncThunk<
         password
       );
       const { user } = userCredentials;
-      return createUserInfo(user);
+      return getUserInfo(user);
     } catch (err) {
       console.log({ typeofError: typeof err, error: err });
       const error = err as AuthError;
       const { code /* name, message, customData, cause, stack */ } = error;
 
-      if (isSelectedAuthErrorCode(code)) {
+      if (isHandledAuthErrorCode(code)) {
         return rejectWithValue(errorMessages[code][thunkApi.getState().lang]);
       }
       return rejectWithValue(code);
@@ -152,12 +165,14 @@ export const registerWithEmailAndPassword = createAsyncThunk<
   }
 );
 
+/*-------------------------------- LOGOUT THUNK ------------------------------*/
 export const logOut = createAsyncThunk('auth/logout', async () => {
   await signOut(auth);
 });
 
-//# -------------------------------- AUTH SLICE ------------------------------*/
-
+/**------------------------------------------------------------------------
+ *#                              AUTH SLICE
+ *------------------------------------------------------------------------**/
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -167,7 +182,6 @@ const authSlice = createSlice({
     error: null,
   } as AuthState,
   reducers: {
-    //* Checked ✅
     setUserInfo: (state, action: PayloadAction<UserInfo | null>) => {
       if (state.user === null && action.payload === null) {
         state.loadingStatus = 'idle';
@@ -209,9 +223,8 @@ const authSlice = createSlice({
         state.loadingStatus = 'idle';
       }
     },
-    // # This reducer is for test purposes only.
-    // # All loadingStatus changes are handled by other reducers.
-
+    // This reducer is for test purposes only.
+    // All loadingStatus changes are handled by other reducers.
     setLoadingStatus: (
       state,
       action: PayloadAction<AuthState['loadingStatus']>
@@ -222,7 +235,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    //# loginWithEmailEndPassword ⬇️
+    /*------------------ LOGIN WITH EMAIL AND PASSWORD BUILDER -----------------*/
     builder
       .addCase(logInWithEmailAndPassword.pending, (state, action) => {
         if (state.loadingStatus === 'idle') {
@@ -252,8 +265,7 @@ const authSlice = createSlice({
           state.error = action.error;
         }
       });
-
-    //# Register with email and password ⬇️
+    /*------------------ REGISTER WITH EMAIL AND PASSWORD BUILDER -----------------*/
     builder
       .addCase(registerWithEmailAndPassword.pending, (state, action) => {
         if (state.loadingStatus === 'idle') {
@@ -282,8 +294,7 @@ const authSlice = createSlice({
           state.error = action.error;
         }
       });
-
-    //# logOut ⬇️
+    /*-------------------------------- LOGOUT BUILDER------------------------------*/
     builder
       .addCase(logOut.pending, (state, action) => {
         if (state.loadingStatus === 'idle') {
@@ -315,6 +326,8 @@ const authSlice = createSlice({
       });
   },
 });
+
+/*------------------------------------------------------------------------*/
 
 export const authReducer = authSlice.reducer;
 export const { setUserInfo, setLoadingStatus } = authSlice.actions;

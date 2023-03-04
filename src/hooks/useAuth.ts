@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useMemo } from 'react';
 
-import { createUserInfo, setUserInfo } from '../features/auth/authSlice';
+import { getUserInfo, setUserInfo } from '../features/auth/authSlice';
 import { auth } from '../services/firebase/firebase';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 
@@ -16,7 +16,7 @@ const useAuth = () => {
     if (!ignore) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          dispatch(setUserInfo(createUserInfo(user)));
+          dispatch(setUserInfo(getUserInfo(user)));
         } else {
           dispatch(setUserInfo(null));
         }

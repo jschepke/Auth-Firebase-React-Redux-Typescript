@@ -15,7 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import { type FormEvent, type MouseEvent, useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { z } from 'zod';
 
 import {
@@ -28,7 +28,6 @@ import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
   const loadingStatus = useAuth().loadingStatus;
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const [checked, setChecked] = useState(true);
@@ -106,20 +105,19 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     event.preventDefault();
 
     const authHandler = async () => {
+      // Navigation after successful login/register handle by the AuthLoadingCheck component
       try {
         if (variant === 'login') {
           await dispatch(
             logInWithEmailAndPassword({ email, password })
           ).unwrap();
           handleFormReset();
-          navigate('/app');
         }
         if (variant === 'register') {
           await dispatch(
             registerWithEmailAndPassword({ email, password })
           ).unwrap();
           handleFormReset();
-          navigate('/app');
         }
       } catch (error) {
         if (typeof error === 'string') {

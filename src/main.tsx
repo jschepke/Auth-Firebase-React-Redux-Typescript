@@ -5,38 +5,43 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import App from './App';
-import { AuthLoadingCheck } from './features/auth/AuthLoadingCheck';
+import Dashboard from './Dashboard';
+import { AuthCheck } from './features/auth/AuthCheck';
+import { AuthGuard } from './features/auth/AuthGuard';
 import LoginPage from './pages/authentication/AuthPage';
 import ErrorPage from './pages/error-page';
 import { paths } from './routes/paths';
-import Root from './routes/Root';
+import { Root } from './routes/Root';
 import { store } from './store';
 
 const router = createBrowserRouter([
   {
-    path: paths.home,
+    path: paths.root,
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: paths.app,
-        element: <App />,
-      },
-      {
-        path: 'login',
+        path: paths.dashboard,
         element: (
-          <AuthLoadingCheck>
-            <LoginPage variant="login" />
-          </AuthLoadingCheck>
+          <AuthGuard>
+            <Dashboard />
+          </AuthGuard>
         ),
       },
       {
-        path: 'register',
+        path: paths.login,
         element: (
-          <AuthLoadingCheck>
+          <AuthCheck>
+            <LoginPage variant="login" />
+          </AuthCheck>
+        ),
+      },
+      {
+        path: paths.register,
+        element: (
+          <AuthCheck>
             <LoginPage variant="register" />
-          </AuthLoadingCheck>
+          </AuthCheck>
         ),
       },
     ],

@@ -1,6 +1,12 @@
+/* eslint-disable max-len */
 import { AuthErrorCodes } from 'firebase/auth';
 
-const selectedAuthErrorCodes = [
+/**
+ * List of Firebase Auth error codes that may occur
+ * @remarks
+ * Based on Firebase AuthErrorCodes. Can be extended. {@link https://firebase.google.com/docs/reference/js/auth.md?hl=en#autherrorcodes | AuthErrorCodes }
+ */
+const firebaseAuthErrors = [
   AuthErrorCodes.EMAIL_EXISTS,
   AuthErrorCodes.USER_DELETED,
   AuthErrorCodes.NETWORK_REQUEST_FAILED,
@@ -8,17 +14,25 @@ const selectedAuthErrorCodes = [
   AuthErrorCodes.INVALID_PASSWORD,
 ] as const;
 
-type SelectedAuthErrorCodesTuple = typeof selectedAuthErrorCodes;
-type SelectedAuthErrorCodes = SelectedAuthErrorCodesTuple[number];
+type FirebaseAuthErrorTuple = typeof firebaseAuthErrors;
+/**
+ * Firebase Auth error codes explicitly handled.
+ */
+type HandledAuthErrors = FirebaseAuthErrorTuple[number];
 
-export const isSelectedAuthErrorCode = (
+/**
+ * Determines if the code is in one of the handled errors.
+ *
+ * @param code - Firebase AuthError code
+ */
+export const isHandledAuthErrorCode = (
   code: string
-): code is SelectedAuthErrorCodes => {
-  return selectedAuthErrorCodes.includes(code as SelectedAuthErrorCodes);
+): code is HandledAuthErrors => {
+  return firebaseAuthErrors.includes(code as HandledAuthErrors);
 };
 
 export const errorMessages: Record<
-  SelectedAuthErrorCodes,
+  HandledAuthErrors,
   { en: string; pl: string }
 > = {
   'auth/wrong-password': {

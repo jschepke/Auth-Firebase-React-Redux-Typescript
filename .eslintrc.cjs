@@ -11,24 +11,27 @@ module.exports = {
     },
   },
   plugins: [
+    // 'markdown',
     '@typescript-eslint',
     'react',
     'react-hooks',
     'jsx-a11y',
     'import',
     'simple-import-sort',
+    'eslint-plugin-tsdoc',
     'prettier',
   ],
   extends: [
+    // 'plugin:markdown/recommended',
     'eslint:recommended', // Eslint recommended configuration by eslint.
     'plugin:@typescript-eslint/recommended', // Turns on rules from TypeScript-specific plugin.
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    // rules that specifically require type information https://typescript-eslint.io/linting/typed-linting
+    'plugin:@typescript-eslint/recommended-requiring-type-checking', // rules that specifically require type information https://typescript-eslint.io/linting/typed-linting
     'plugin:react/recommended', // Recommended react linting configs.
     'plugin:react-hooks/recommended', // Recommended react hooks linting configs.
     'plugin:jsx-a11y/recommended', // Turns on a11y rules for JSX.
     'plugin:import/recommended', // Linting of ES2015+ import/export syntax.
     'plugin:import/typescript',
+    'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended', // Turns off all rules that are unnecessary or might conflict with Prettier.
   ],
 
@@ -41,6 +44,7 @@ module.exports = {
     'simple-import-sort/exports': 'warn',
     'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
+    'tsdoc/syntax': 'warn',
     'react/jsx-sort-props': [
       'warn',
       {
@@ -65,6 +69,14 @@ module.exports = {
     'import/no-unresolved': [
       2,
       { ignore: ['^@theme', '^@docusaurus', '^@site'] },
+    ],
+    '@typescript-eslint/no-misused-promises': [
+      2,
+      {
+        checksVoidReturn: {
+          attributes: false,
+        },
+      },
     ],
   },
   env: {
