@@ -1,19 +1,17 @@
 import type { SerializedError } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { AuthError, User } from 'firebase/auth';
 import {
+  type User,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from 'firebase/auth';
 
-import { auth } from '../../services/firebase/firebase';
-import { AppDispatch, RootState } from '../../store';
-import {
-  errorMessages,
-  fallbackErrorMessage,
-  isHandledAuthErrorCode,
-} from './errorCodes';
+import { auth, googleAuthProvider } from '../../services/firebase/firebase';
+import { RootState } from '../../store';
 
 /**------------------------------------------------------------------------
  *#                                TYPES
@@ -69,10 +67,9 @@ export const getUserInfo = (user: User): UserInfo => {
 
 /*------------------ LOGIN WITH EMAIL AND PASSWORD THUNK -----------------*/
 export const logInWithEmailAndPassword = createAsyncThunk<
-  UserInfo,
+  void,
   EmailAndPassword,
   {
-    dispatch: AppDispatch;
     state: RootState;
     rejectValue: string;
   }
@@ -82,30 +79,13 @@ export const logInWithEmailAndPassword = createAsyncThunk<
     const { user: currentUser } = thunkApi.getState().auth;
     const { rejectWithValue } = thunkApi;
 
+    // This condition take affect only without AuthObserver and
+    // auto redirection if user is logged in.
     if (currentUser?.email === email.toLowerCase()) {
       return rejectWithValue('User already logged in');
     }
 
-    try {
-      const userCredentials = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      const { user } = userCredentials;
-      return getUserInfo(user);
-    } catch (error) {
-      const authError = error as AuthError;
-      const { code, name, message, customData, cause, stack } = authError;
-      console.log({ code, name, message, customData, cause, stack });
-
-      if (isHandledAuthErrorCode(code)) {
-        return rejectWithValue(errorMessages[code][thunkApi.getState().lang]);
-      }
-
-      return rejectWithValue(fallbackErrorMessage[thunkApi.getState().lang]);
-    }
+    await signInWithEmailAndPassword(auth, email, password);
   },
   // This cancels before entering the thunk
   {
@@ -120,38 +100,17 @@ export const logInWithEmailAndPassword = createAsyncThunk<
 
 /*------------------ REGISTER WITH EMAIL AND PASSWORD THUNK -----------------*/
 export const registerWithEmailAndPassword = createAsyncThunk<
-  UserInfo,
+  void,
   EmailAndPassword,
   {
-    dispatch: AppDispatch;
     state: RootState;
-    rejectValue: string;
   }
 >(
   `auth/registerWithEmail`,
-  async ({ email, password }, thunkApi) => {
-    const { rejectWithValue } = thunkApi;
-
-    try {
-      const userCredentials = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const { user } = userCredentials;
-      return getUserInfo(user);
-    } catch (err) {
-      console.log({ typeofError: typeof err, error: err });
-      const error = err as AuthError;
-      const { code /* name, message, customData, cause, stack */ } = error;
-
-      if (isHandledAuthErrorCode(code)) {
-        return rejectWithValue(errorMessages[code][thunkApi.getState().lang]);
-      }
-      return rejectWithValue(code);
-    }
+  async ({ email, password }) => {
+    await createUserWithEmailAndPassword(auth, email, password);
   },
-  //# canceling before entering the thunk
+  // canceling before entering the thunk
   // Todo: Add feature
   // Implement better error message for this case inside the component.
   // Now there is only generic error message.
@@ -162,6 +121,23 @@ export const registerWithEmailAndPassword = createAsyncThunk<
         return false;
       }
     },
+  }
+);
+
+/*------------------------------ SIGN IN WITH GOOGLE ----------------------------*/
+
+export const signInWithGooglePopup = createAsyncThunk(
+  'auth/signInWithGooglePopup',
+  async () => {
+    await signInWithPopup(auth, googleAuthProvider);
+  }
+);
+
+export const signInWithGoogleRedirect = createAsyncThunk(
+  'auth/signInWithGoogleRedirect',
+  async () => {
+    await signInWithRedirect(auth, googleAuthProvider);
+    await getRedirectResult(auth);
   }
 );
 
@@ -183,44 +159,43 @@ const authSlice = createSlice({
   } as AuthState,
   reducers: {
     setUserInfo: (state, action: PayloadAction<UserInfo | null>) => {
-      if (state.user === null && action.payload === null) {
-        state.loadingStatus = 'idle';
-        console.log('no user logged in');
-        return;
-      }
-
-      if (state.user === null && action.payload) {
-        console.log('user logged in');
-        state.user = action.payload;
-        state.loadingStatus = 'idle';
-      }
-
-      if (
-        state.user &&
-        action.payload &&
-        state.user.uid !== action.payload.uid
-      ) {
-        console.log(
-          'Logged in user has been replaced with another user that logged in'
-        );
-        state.user = action.payload;
-        state.loadingStatus = 'idle';
-      }
-
-      if (
-        state.user &&
-        action.payload &&
-        state.user.uid === action.payload.uid
-      ) {
-        console.log('The same user uid. No action');
-        state.loadingStatus = 'idle';
-        return;
-      }
-
-      if (state.user && action.payload === null) {
-        console.log('user logged out');
-        state.user = null;
-        state.loadingStatus = 'idle';
+      switch (true) {
+        case state.user === null && action.payload === null: {
+          state.loadingStatus = 'idle';
+          console.log('no user logged in');
+          break;
+        }
+        case state.user === null && action.payload !== null: {
+          state.user = action.payload;
+          state.loadingStatus = 'idle';
+          console.log('user logged in');
+          break;
+        }
+        case state.user &&
+          action.payload &&
+          state.user.uid !== action.payload.uid: {
+          state.user = action.payload;
+          state.loadingStatus = 'idle';
+          console.log(
+            'User has been replaced with another user that logged in'
+          );
+          break;
+        }
+        case state.user?.uid === action.payload?.uid: {
+          state.loadingStatus = 'idle';
+          console.log('The same user uid. No action');
+          break;
+        }
+        case state.user !== null && action.payload === null: {
+          state.user = null;
+          state.loadingStatus = 'idle';
+          console.log('user logged out');
+          break;
+        }
+        default: {
+          console.log('Unknown user state');
+          break;
+        }
       }
     },
     // This reducer is for test purposes only.
@@ -238,9 +213,10 @@ const authSlice = createSlice({
     /*------------------ LOGIN WITH EMAIL AND PASSWORD BUILDER -----------------*/
     builder
       .addCase(logInWithEmailAndPassword.pending, (state, action) => {
+        const { requestId } = action.meta;
         if (state.loadingStatus === 'idle') {
           state.loadingStatus = 'pending';
-          state.currentRequestId = action.meta.requestId;
+          state.currentRequestId = requestId;
         }
       })
       .addCase(logInWithEmailAndPassword.fulfilled, (state, action) => {
@@ -268,9 +244,10 @@ const authSlice = createSlice({
     /*------------------ REGISTER WITH EMAIL AND PASSWORD BUILDER -----------------*/
     builder
       .addCase(registerWithEmailAndPassword.pending, (state, action) => {
+        const { requestId } = action.meta;
         if (state.loadingStatus === 'idle') {
           state.loadingStatus = 'pending';
-          state.currentRequestId = action.meta.requestId;
+          state.currentRequestId = requestId;
         }
       })
       .addCase(registerWithEmailAndPassword.fulfilled, (state, action) => {
@@ -294,12 +271,44 @@ const authSlice = createSlice({
           state.error = action.error;
         }
       });
+
+    /*----------------------- SIGN IN WITH GOOGLE POPUP BUILDER --------------------*/
+    builder
+      .addCase(signInWithGooglePopup.pending, (state, action) => {
+        const { requestId } = action.meta;
+        if (state.loadingStatus === 'idle') {
+          state.loadingStatus = 'pending';
+          state.currentRequestId = requestId;
+        }
+      })
+      .addCase(signInWithGooglePopup.fulfilled, (state, action) => {
+        const { requestId } = action.meta;
+        if (
+          state.loadingStatus === 'pending' &&
+          state.currentRequestId === requestId
+        ) {
+          state.loadingStatus = 'idle';
+          state.currentRequestId = undefined;
+          state.error = null;
+        }
+      })
+      .addCase(signInWithGooglePopup.rejected, (state, action) => {
+        const { requestId } = action.meta;
+        if (
+          state.loadingStatus === 'pending' &&
+          state.currentRequestId === requestId
+        ) {
+          state.loadingStatus = 'idle';
+          state.error = action.error;
+        }
+      });
     /*-------------------------------- LOGOUT BUILDER------------------------------*/
     builder
       .addCase(logOut.pending, (state, action) => {
+        const { requestId } = action.meta;
         if (state.loadingStatus === 'idle') {
           state.loadingStatus = 'pending';
-          state.currentRequestId = action.meta.requestId;
+          state.currentRequestId = requestId;
         }
       })
       .addCase(logOut.fulfilled, (state, action) => {

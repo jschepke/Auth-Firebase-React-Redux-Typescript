@@ -1,6 +1,10 @@
 import { FirebaseOptions, initializeApp } from 'firebase/app';
-import type { User } from 'firebase/auth';
-import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import {
+  type User,
+  connectAuthEmulator,
+  getAuth,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import {
   collection,
   connectFirestoreEmulator,
@@ -22,8 +26,26 @@ const firebaseConfig: FirebaseOptions = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// default way to initialize auth
+/**------------------------------------------------------------------------
+ *#                              AUTH
+ *------------------------------------------------------------------------**/
+
+/**
+ * Firebase Auth instance
+ * @remarks
+ * Default way to initialize auth
+ */
 const auth = getAuth(app);
+
+// Sets the current language to the default device/browser preference
+auth.useDeviceLanguage();
+
+// Auth providers
+const googleAuthProvider = new GoogleAuthProvider();
+
+/**------------------------------------------------------------------------
+ *#                             FIRESTORE
+ *------------------------------------------------------------------------**/
 
 const firestore = getFirestore();
 
@@ -36,7 +58,15 @@ const firestoreQueries = {
   },
 };
 
+/**------------------------------------------------------------------------
+ *#                            EMULATOR
+ *------------------------------------------------------------------------**/
+
 connectAuthEmulator(auth, 'http://localhost:9099');
 connectFirestoreEmulator(firestore, 'localhost', 8080);
 
-export { auth, firestore, firestoreQueries };
+/**------------------------------------------------------------------------
+ *#                           EXPORTS
+ *------------------------------------------------------------------------**/
+
+export { auth, firestore, firestoreQueries, googleAuthProvider };

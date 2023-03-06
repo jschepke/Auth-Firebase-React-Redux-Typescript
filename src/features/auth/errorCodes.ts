@@ -26,9 +26,12 @@ type HandledAuthErrors = FirebaseAuthErrorTuple[number];
  * @param code - Firebase AuthError code
  */
 export const isHandledAuthErrorCode = (
-  code: string
+  code: unknown
 ): code is HandledAuthErrors => {
-  return firebaseAuthErrors.includes(code as HandledAuthErrors);
+  if (typeof code === 'string') {
+    return firebaseAuthErrors.includes(code as HandledAuthErrors);
+  }
+  return false;
 };
 
 export const errorMessages: Record<

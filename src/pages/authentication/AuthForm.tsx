@@ -13,6 +13,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { type FormEvent, type MouseEvent, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -21,14 +23,24 @@ import { z } from 'zod';
 import {
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
+  signInWithGooglePopup,
+  signInWithGoogleRedirect,
 } from '../../features/auth/authSlice';
-import { useAppDispatch } from '../../hooks/redux-hooks';
+import {
+  errorMessages as errorMessagesPredefined,
+  fallbackErrorMessage,
+  isHandledAuthErrorCode,
+} from '../../features/auth/errorCodes';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hooks';
 import useAuth from '../../hooks/useAuth';
 import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
   const loadingStatus = useAuth().loadingStatus;
+  const lang = useAppSelector((state) => state.lang);
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const mediaQueryMatches = useMediaQuery(theme.breakpoints.up('md'));
 
   const [checked, setChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -105,7 +117,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     event.preventDefault();
 
     const authHandler = async () => {
-      // Navigation after successful login/register handle by the AuthLoadingCheck component
+      // Navigation after successful login/register handle by the AuthObserver component
       try {
         if (variant === 'login') {
           await dispatch(
@@ -120,10 +132,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
           handleFormReset();
         }
       } catch (error) {
-        if (typeof error === 'string') {
-          setErrorMessages({ ...errorMessages, auth: error });
-          return;
-        }
+        handleAuthError(error);
       }
     };
 
@@ -148,6 +157,61 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     event.preventDefault();
   };
 
+  /**
+   * @remarks
+   * In order to optimize user experience, media queries are utilized to
+   * tailor the sign-in process according to the device screen size.
+   * For mobile devices, signing in with redirection is the preferred method.
+   * This ensures seamless navigation and convenience for users on smaller screens.
+   */
+  const handleGoogleSignIn = async () => {
+    if (!mediaQueryMatches) {
+      try {
+        await dispatch(signInWithGoogleRedirect()).unwrap();
+      } catch (error) {
+        handleAuthError(error);
+      }
+    }
+    try {
+      await dispatch(signInWithGooglePopup()).unwrap();
+    } catch (error) {
+      handleAuthError(error);
+    }
+  };
+
+  /**
+   * @remarks
+   * To prevent code duplication in form submission and third-party provider sign-in,
+   * the auth error handler has been extracted into a separate function.
+   */
+  const handleAuthError = (error: unknown) => {
+    let code = null;
+
+    console.log(error);
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      typeof error.code === 'string'
+    ) {
+      console.log('error code:', error.code);
+      code = error.code;
+    }
+
+    if (isHandledAuthErrorCode(code)) {
+      setErrorMessages({
+        ...errorMessages,
+        auth: errorMessagesPredefined[code][lang],
+      });
+      return;
+    }
+
+    setErrorMessages({
+      ...errorMessages,
+      auth: fallbackErrorMessage[lang],
+    });
+  };
+
   const handleFormReset = () => {
     setEmail('');
     setPassword('');
@@ -167,7 +231,12 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Button fullWidth variant="contained" size="large">
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            onClick={handleGoogleSignIn}
+          >
             Google
           </Button>
           {/* <FirebaseSocial /> */}
