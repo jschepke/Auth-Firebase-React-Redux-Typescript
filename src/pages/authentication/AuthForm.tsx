@@ -16,7 +16,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { type FormEvent, type MouseEvent, useState } from 'react';
+import { type FormEvent, type MouseEvent, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -42,7 +42,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   const theme = useTheme();
   const mediaQueryMatches = useMediaQuery(theme.breakpoints.up('md'));
 
-  const [checked, setChecked] = useState(true);
+  const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,6 +51,15 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     password: null | string;
     auth: null | string;
   }>({ email: null, password: null, auth: null });
+
+  useEffect(() => {
+    const sessionPersistence = sessionStorage.getItem('sessionPersistence');
+    if (!keepSignedIn && !sessionPersistence) {
+      sessionStorage.setItem('sessionPersistence', 'true');
+      return;
+    }
+    sessionStorage.removeItem('sessionPersistence');
+  }, [keepSignedIn]);
 
   const variantSpecs = {
     login: {
@@ -163,6 +172,10 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
    * tailor the sign-in process according to the device screen size.
    * For mobile devices, signing in with redirection is the preferred method.
    * This ensures seamless navigation and convenience for users on smaller screens.
+   *
+   * Production might need adjustments with redirect sign-ins on
+   * browsers that block third-party cookies:
+   * {@link https://firebase.google.com/docs/auth/web/redirect-best-practices}
    */
   const handleGoogleSignIn = async () => {
     if (!mediaQueryMatches) {
@@ -308,11 +321,13 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={checked}
+                    checked={keepSignedIn}
                     name="checked"
                     color="primary"
                     size="small"
-                    onChange={(event) => setChecked(event.target.checked)}
+                    onChange={(event) => {
+                      setKeepSignedIn(event.target.checked);
+                    }}
                   />
                 }
                 label={<Typography variant="body2">Keep me sign in</Typography>}

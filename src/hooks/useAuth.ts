@@ -1,4 +1,8 @@
-import { onAuthStateChanged } from 'firebase/auth';
+import {
+  browserSessionPersistence,
+  onAuthStateChanged,
+  setPersistence,
+} from 'firebase/auth';
 import { useEffect, useMemo } from 'react';
 
 import { getUserInfo, setUserInfo } from '../features/auth/authSlice';
@@ -12,8 +16,28 @@ const useAuth = () => {
 
   useEffect(() => {
     let ignore = false;
+    const sessionPersistance = sessionStorage.getItem('sessionPersistence');
 
     if (!ignore) {
+      onAuthStateChanged(auth, (user) => {
+        if (user && sessionPersistance) {
+          setPersistence(auth, browserSessionPersistence)
+            .then(() => dispatch(setUserInfo(getUserInfo(user))))
+            .catch((error) => console.log(error));
+
+          console.log('sessionPersistance set');
+          return;
+        }
+        if (user && !sessionPersistance) {
+          dispatch(setUserInfo(getUserInfo(user)));
+          console.log('default persistance set');
+          return;
+        }
+        dispatch(setUserInfo(null));
+        console.log('User === null');
+      });
+    }
+    /* if (!ignore) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
           dispatch(setUserInfo(getUserInfo(user)));
@@ -21,7 +45,7 @@ const useAuth = () => {
           dispatch(setUserInfo(null));
         }
       });
-    }
+    } */
 
     // clean-up
     return () => {
