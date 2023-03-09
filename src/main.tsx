@@ -6,8 +6,8 @@ import { Provider } from 'react-redux';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import Dashboard from './Dashboard';
-import { AuthCheck } from './features/auth/AuthCheck';
 import { AuthGuard } from './features/auth/AuthGuard';
+import { AuthObserver } from './features/auth/AuthObserver';
 import LoginPage from './pages/authentication/AuthPage';
 import ErrorPage from './pages/error-page';
 import { paths } from './routes/paths';
@@ -31,17 +31,17 @@ const router = createBrowserRouter([
       {
         path: paths.login,
         element: (
-          <AuthCheck>
+          <AuthObserver>
             <LoginPage variant="login" />
-          </AuthCheck>
+          </AuthObserver>
         ),
       },
       {
         path: paths.register,
         element: (
-          <AuthCheck>
+          <AuthObserver>
             <LoginPage variant="register" />
-          </AuthCheck>
+          </AuthObserver>
         ),
       },
     ],

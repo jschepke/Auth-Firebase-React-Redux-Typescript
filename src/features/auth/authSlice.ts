@@ -66,6 +66,7 @@ export const getUserInfo = (user: User): UserInfo => {
  *------------------------------------------------------------------------**/
 
 /*------------------ LOGIN WITH EMAIL AND PASSWORD THUNK -----------------*/
+
 export const logInWithEmailAndPassword = createAsyncThunk<
   void,
   EmailAndPassword,
@@ -79,8 +80,7 @@ export const logInWithEmailAndPassword = createAsyncThunk<
     const { user: currentUser } = thunkApi.getState().auth;
     const { rejectWithValue } = thunkApi;
 
-    // This condition take affect only without AuthObserver and
-    // auto redirection if user is logged in.
+    // This condition will take affect only if AuthObserver isn't used for redirection
     if (currentUser?.email === email.toLowerCase()) {
       return rejectWithValue('User already logged in');
     }
@@ -133,6 +133,12 @@ export const signInWithGooglePopup = createAsyncThunk(
   }
 );
 
+/**
+ * Due to redirection mechanism of signing in,
+ * this thunk cannot be traced with redux dev tools
+ *
+ * No point to include this inside extra reducers builder case.
+ */
 export const signInWithGoogleRedirect = createAsyncThunk(
   'auth/signInWithGoogleRedirect',
   async () => {
@@ -162,13 +168,11 @@ const authSlice = createSlice({
       switch (true) {
         case state.user === null && action.payload === null: {
           state.loadingStatus = 'idle';
-          console.log('no user logged in');
           break;
         }
         case state.user === null && action.payload !== null: {
           state.user = action.payload;
           state.loadingStatus = 'idle';
-          console.log('user logged in');
           break;
         }
         case state.user &&
@@ -176,24 +180,19 @@ const authSlice = createSlice({
           state.user.uid !== action.payload.uid: {
           state.user = action.payload;
           state.loadingStatus = 'idle';
-          console.log(
-            'User has been replaced with another user that logged in'
-          );
           break;
         }
         case state.user?.uid === action.payload?.uid: {
           state.loadingStatus = 'idle';
-          console.log('The same user uid. No action');
           break;
         }
         case state.user !== null && action.payload === null: {
           state.user = null;
           state.loadingStatus = 'idle';
-          console.log('user logged out');
           break;
         }
         default: {
-          console.log('Unknown user state');
+          console.info('Unknown user state');
           break;
         }
       }
@@ -302,6 +301,7 @@ const authSlice = createSlice({
           state.error = action.error;
         }
       });
+
     /*-------------------------------- LOGOUT BUILDER------------------------------*/
     builder
       .addCase(logOut.pending, (state, action) => {

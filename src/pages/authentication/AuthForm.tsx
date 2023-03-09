@@ -156,7 +156,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     void authHandler();
   };
 
-  const handleClickShowPassword = () => {
+  const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
@@ -293,7 +293,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
                   <IconButton
                     aria-label="toggle password visibility"
                     edge="end"
-                    onClick={handleClickShowPassword}
+                    onClick={handleShowPassword}
                     onMouseDown={handleMouseDownPassword}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
