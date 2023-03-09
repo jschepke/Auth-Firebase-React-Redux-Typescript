@@ -33,6 +33,7 @@ import {
 } from '../../features/auth/errorCodes';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux-hooks';
 import useAuth from '../../hooks/useAuth';
+import { authPersistence } from '../../utils/authPersistence';
 import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
@@ -53,12 +54,9 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   }>({ email: null, password: null, auth: null });
 
   useEffect(() => {
-    const sessionPersistence = sessionStorage.getItem('sessionPersistence');
-    if (!keepSignedIn && !sessionPersistence) {
-      sessionStorage.setItem('sessionPersistence', 'true');
-      return;
-    }
-    sessionStorage.removeItem('sessionPersistence');
+    if (!keepSignedIn) {
+      authPersistence.set();
+    } else authPersistence.remove();
   }, [keepSignedIn]);
 
   const variantSpecs = {
