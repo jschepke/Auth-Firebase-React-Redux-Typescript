@@ -1,13 +1,20 @@
 import {
   browserSessionPersistence,
+  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
 } from 'firebase/auth';
 import { useEffect, useMemo } from 'react';
 
-import { getUserInfo, setUserInfo } from '../features/auth/authSlice';
+import {
+  addToUsersCollection,
+  getUserInfo,
+  setUser,
+} from '../features/auth/authSlice';
 import { auth } from '../services/firebase/firebase';
 import { authPersistence } from '../utils/authPersistence';
+import { consoleLogger } from '../utils/consoleLogger';
+import { viteMode } from '../utils/viteMode';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 
 const useAuth = () => {
@@ -15,27 +22,42 @@ const useAuth = () => {
   const loadingStatus = useAppSelector((state) => state.auth.loadingStatus);
   const dispatch = useAppDispatch();
 
+  const log = consoleLogger(viteMode, 'useAuth.ts');
+
   useEffect(() => {
     let ignore = false;
 
     if (!ignore) {
       onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          dispatch(setUser(null));
+          return;
+        }
+        getRedirectResult(auth)
+          .then((result) => {
+            if (result) {
+              log.info(`${getRedirectResult.name} => result:`, result);
+              addToUsersCollection(result.user.uid).catch((error) =>
+                log.error(error)
+              );
+            }
+          })
+          .catch((error) => log.error(error));
+
         const persistence = authPersistence.get();
 
         if (user && persistence === 'SESSION') {
           setPersistence(auth, browserSessionPersistence)
-            .then(() => dispatch(setUserInfo(getUserInfo(user))))
-            .catch((error) => console.log(error));
+            .then(() => dispatch(setUser(getUserInfo(user))))
+            .catch((error) => log.error(error));
 
           return;
         }
 
         if ((user && !persistence) || (user && persistence === 'LOCAL')) {
-          dispatch(setUserInfo(getUserInfo(user)));
+          dispatch(setUser(getUserInfo(user)));
           return;
         }
-
-        dispatch(setUserInfo(null));
       });
     }
 
@@ -43,6 +65,7 @@ const useAuth = () => {
     return () => {
       ignore = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return useMemo(() => ({ user, loadingStatus }), [user, loadingStatus]);

@@ -3,15 +3,23 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   type User,
   createUserWithEmailAndPassword,
-  getRedirectResult,
   signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
   signOut,
 } from 'firebase/auth';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 
-import { auth, googleAuthProvider } from '../../services/firebase/firebase';
+import {
+  auth,
+  firestore,
+  googleAuthProvider,
+} from '../../services/firebase/firebase';
 import { RootState } from '../../store';
+import { consoleLogger } from '../../utils/consoleLogger';
+import { viteMode } from '../../utils/viteMode';
+
+const log = consoleLogger(viteMode, 'authSlice.ts');
 
 /**------------------------------------------------------------------------
  *#                                TYPES
@@ -61,6 +69,43 @@ export const getUserInfo = (user: User): UserInfo => {
   };
 };
 
+/**
+ * Adds new user to the `users` firestore collection.
+ *
+ * @remarks This allows to store any additional user data.
+ * @param uid - Firebase User uid
+ */
+export const addToUsersCollection = async (uid: string) => {
+  const userRef = doc(firestore, 'users', uid);
+
+  try {
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+      log.info(
+        'addToUsersCollection()',
+        `\nUser already in users collection, uid: ${uid}`
+      );
+      return;
+    } else {
+      await setDoc(
+        userRef,
+        {
+          timestamp: Timestamp.now(),
+        },
+        { merge: true }
+      );
+      log.success(
+        'addToUsersCollection()',
+        `\nNew user added to users collection, uid: ${uid}`,
+        setDoc
+      );
+    }
+  } catch (error) {
+    log.error(error);
+  }
+};
+
 /**------------------------------------------------------------------------
  *#                           ASYNC THUNKS
  *------------------------------------------------------------------------**/
@@ -108,7 +153,13 @@ export const registerWithEmailAndPassword = createAsyncThunk<
 >(
   `auth/registerWithEmail`,
   async ({ email, password }) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await addToUsersCollection(userCredential.user.uid);
   },
   // canceling before entering the thunk
   // Todo: Add feature
@@ -129,7 +180,9 @@ export const registerWithEmailAndPassword = createAsyncThunk<
 export const signInWithGooglePopup = createAsyncThunk(
   'auth/signInWithGooglePopup',
   async () => {
-    await signInWithPopup(auth, googleAuthProvider);
+    const userCredential = await signInWithPopup(auth, googleAuthProvider);
+
+    await addToUsersCollection(userCredential.user.uid);
   }
 );
 
@@ -143,7 +196,6 @@ export const signInWithGoogleRedirect = createAsyncThunk(
   'auth/signInWithGoogleRedirect',
   async () => {
     await signInWithRedirect(auth, googleAuthProvider);
-    await getRedirectResult(auth);
   }
 );
 
@@ -164,7 +216,11 @@ const authSlice = createSlice({
     error: null,
   } as AuthState,
   reducers: {
-    setUserInfo: (state, action: PayloadAction<UserInfo | null>) => {
+    /**
+     * Set current user state.
+     * Accepts serialized data from {@link getUserInfo} or null.
+     */
+    setUser: (state, action: PayloadAction<UserInfo | null>) => {
       switch (true) {
         case state.user === null && action.payload === null: {
           state.loadingStatus = 'idle';
@@ -192,7 +248,7 @@ const authSlice = createSlice({
           break;
         }
         default: {
-          console.info('Unknown user state');
+          log.worn('Unknown user state');
           break;
         }
       }
@@ -339,4 +395,4 @@ const authSlice = createSlice({
 /*------------------------------------------------------------------------*/
 
 export const authReducer = authSlice.reducer;
-export const { setUserInfo, setLoadingStatus } = authSlice.actions;
+export const { setUser, setLoadingStatus } = authSlice.actions;
