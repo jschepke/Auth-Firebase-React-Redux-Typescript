@@ -30,10 +30,12 @@ import {
   errorMessages as errorMessagesPredefined,
   fallbackErrorMessage,
   isHandledAuthErrorCode,
-} from '../../features/auth/errorCodes';
+} from '../../features/auth/errorMessages';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux-hooks';
 import useAuth from '../../hooks/useAuth';
 import { authPersistence } from '../../utils/authPersistence';
+import { consoleLogger } from '../../utils/consoleLogger';
+import { viteMode } from '../../utils/viteMode';
 import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
@@ -42,6 +44,8 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const mediaQueryMatches = useMediaQuery(theme.breakpoints.up('md'));
+
+  const log = consoleLogger(viteMode, 'AuthForm.tsx');
 
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -77,7 +81,9 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   };
 
   const validateEmail = (value: string) => {
-    const validationEmail = z.string().email();
+    const validationEmail = z.string().email({
+      message: lang === 'en' ? 'Invalid email' : 'Email niepoprawny',
+    });
     try {
       validationEmail.parse(value);
       setErrorMessages((prevState) => ({
@@ -99,7 +105,18 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   };
 
   const validatePassword = (value: string) => {
-    const validationPassword = z.string().min(8).max(255);
+    const validationPassword = z
+      .string()
+      .min(8, {
+        message:
+          lang === 'en'
+            ? 'Must be at least 8 more characters'
+            : 'Hasło musi zawierać co najmniej 8 znaków',
+      })
+      .max(255, {
+        message:
+          lang === 'en' ? 'Password is too long' : 'Hasło jest za długie',
+      });
     try {
       validationPassword.parse(value);
       setErrorMessages((prevState) => ({
@@ -198,14 +215,14 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   const handleAuthError = (error: unknown) => {
     let code = null;
 
-    console.log(error);
+    log.log('handleAuthError', error);
     if (
       error !== null &&
       typeof error === 'object' &&
       'code' in error &&
       typeof error.code === 'string'
     ) {
-      console.log('error code:', error.code);
+      log.log('handleAuthError, error code:', error.code);
       code = error.code;
     }
 
