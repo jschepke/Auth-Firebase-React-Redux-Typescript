@@ -5,9 +5,12 @@ import Toolbar from '@mui/material/Toolbar';
 import { Link as RouterLink, useMatch } from 'react-router-dom';
 
 import { logOut } from '../features/auth/authSlice';
-import { useAppDispatch } from '../hooks/redux-hooks';
+import { toggleLanguage } from '../features/lang/langSlice';
+import { useAppDispatch, useAppSelector } from '../hooks/redux-hooks';
 import useAuth from '../hooks/useAuth';
 import { type Paths, paths } from '../routes/paths';
+import { consoleLogger } from '../utils/consoleLogger';
+import { viteMode } from '../utils/viteMode';
 
 interface NavLinkProps {
   path: Paths;
@@ -31,6 +34,9 @@ const NavLink = ({ path }: NavLinkProps) => {
 export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
+  const lang = useAppSelector((state) => state.lang);
+
+  const cl = consoleLogger(viteMode, 'NavBar.tsx');
 
   const renderNavLinks = Object.values(paths).map((path) => (
     <NavLink key={path} path={path} />
@@ -40,7 +46,7 @@ export default function Navbar() {
     try {
       await dispatch(logOut()).unwrap();
     } catch (error) {
-      console.error(error);
+      cl.error(error);
     }
   };
 
@@ -52,6 +58,11 @@ export default function Navbar() {
             {renderNavLinks}
           </Stack>
           {user && <Button onClick={handleLogout}>Logout</Button>}
+          <Button onClick={() => dispatch(toggleLanguage())}>
+            {lang === 'en'
+              ? lang.toLocaleUpperCase()
+              : lang.toLocaleUpperCase()}
+          </Button>
         </Toolbar>
       </AppBar>
     </Box>
