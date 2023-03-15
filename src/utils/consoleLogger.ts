@@ -1,7 +1,13 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-type ColorMapTypes = 'default' | 'success' | 'info' | 'warning' | 'error';
+type ColorMapTypes =
+  | 'default'
+  | 'success'
+  | 'info'
+  | 'warning'
+  | 'error'
+  | 'log';
 
 type ColorMap = {
   [key in ColorMapTypes]: string;
@@ -30,10 +36,11 @@ const consoleLogger = (
 
   const colorMap: ColorMap = {
     default: '#7f8c8d',
-    success: '#00E676',
-    info: '#29b6f6',
-    warning: '#FFA000',
     error: '#FF5722',
+    info: '#29b6f6',
+    log: '#FAFAFA',
+    success: '#00E676',
+    warning: '#FFA000',
   };
 
   const getBadgeStyle = (type: ColorMapTypes) => {
@@ -48,6 +55,25 @@ const consoleLogger = (
     return `color: ${colorMap[type]}; font-weight: bold;padding: 2px 0.5em;`;
   };
 
+  const log = (message?: any, ...optionalParams: any[]) => {
+    if (!showLogs) return;
+
+    filename
+      ? console.log(
+          `%cLog%c${filename}\n`,
+          getBadgeStyle('log'),
+          getFileNameStyle('default'),
+          message,
+          ...optionalParams
+        )
+      : console.log(
+          `%cLog`,
+          getBadgeStyle('log'),
+          '\n',
+          message,
+          ...optionalParams
+        );
+  };
   const info = (message?: any, ...optionalParams: any[]) => {
     if (!showLogs) return;
 
@@ -131,6 +157,7 @@ const consoleLogger = (
     success,
     info,
     worn,
+    log,
     // setFilename,
   };
 };
