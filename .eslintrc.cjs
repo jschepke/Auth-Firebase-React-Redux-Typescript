@@ -78,6 +78,7 @@ module.exports = {
         },
       },
     ],
+    'no-console': 'warn',
   },
   env: {
     es6: true, // enable ES2015 features.
