@@ -1,12 +1,14 @@
-import { Button, Link, Stack } from '@mui/material';
+import LanguageIcon from '@mui/icons-material/Language';
+import { Button, Link, Menu, MenuItem, Stack } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import { useState } from 'react';
 import { Link as RouterLink, useMatch } from 'react-router-dom';
 
 import { logOut } from '../features/auth/authSlice';
+import { LanguageCodes, languages } from '../features/i18n/i18nConfig';
 import { setLanguage } from '../features/i18n/i18nSlice';
-import { toggleLanguage } from '../features/lang/langSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/redux-hooks';
 import useAuth from '../hooks/useAuth';
 import { type Paths, paths } from '../routes/paths';
@@ -36,11 +38,60 @@ const NavLink = ({ path }: NavLinkProps) => {
   );
 };
 
+const SelectLang = () => {
+  const i18nLang = useAppSelector((state) => state.i18n.lang);
+  const dispatch = useAppDispatch();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <div>
+      <Button
+        id="change-language-button"
+        aria-controls={open ? 'language-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        startIcon={<LanguageIcon />}
+        onClick={handleClick}
+      >
+        {i18nLang}
+      </Button>
+      <Menu
+        id="language-menu"
+        anchorEl={anchorEl}
+        open={open}
+        MenuListProps={{
+          'aria-labelledby': 'change-language-button',
+        }}
+        onClose={handleClose}
+      >
+        {Object.entries(languages).map(([code, name]) => (
+          <MenuItem
+            key={code}
+            onClick={() => {
+              dispatch(setLanguage(code as LanguageCodes));
+              handleClose();
+            }}
+          >
+            {name}
+          </MenuItem>
+        ))}
+      </Menu>
+    </div>
+  );
+};
+
 export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
-  const lang = useAppSelector((state) => state.lang);
-  const i18nLang = useAppSelector((state) => state.i18n.lang);
 
   const cl = consoleLogger(viteMode, 'NavBar.tsx');
 
@@ -64,16 +115,7 @@ export default function Navbar() {
             {renderNavLinks}
           </Stack>
           {user && <Button onClick={handleLogout}>Logout</Button>}
-          <Button onClick={() => dispatch(toggleLanguage())}>
-            {lang === 'en' ? lang : lang}
-          </Button>
-          <Button
-            onClick={() =>
-              dispatch(setLanguage(i18nLang === 'en' ? 'pl' : 'en'))
-            }
-          >
-            {i18nLang === 'en' ? i18nLang + ' i18n' : i18nLang + ' i18n'}
-          </Button>
+          <SelectLang />
         </Toolbar>
       </AppBar>
     </Box>

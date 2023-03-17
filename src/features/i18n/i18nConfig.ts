@@ -1,6 +1,6 @@
 export type LanguageCodes = 'en' | 'pl';
 
-type Languages = {
+export type Languages = {
   [key in LanguageCodes]: string;
 };
 
