@@ -5,6 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { Link as RouterLink, useMatch } from 'react-router-dom';
 
 import { logOut } from '../features/auth/authSlice';
+import { setLanguage } from '../features/i18n/i18nSlice';
 import { toggleLanguage } from '../features/lang/langSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/redux-hooks';
 import useAuth from '../hooks/useAuth';
@@ -17,6 +18,8 @@ interface NavLinkProps {
 }
 
 const NavLink = ({ path }: NavLinkProps) => {
+  const translations = useAppSelector((state) => state.i18n.translations);
+
   const match = useMatch(path);
   return (
     <Link
@@ -26,7 +29,9 @@ const NavLink = ({ path }: NavLinkProps) => {
       to={path}
       color={match ? 'primary' : 'inherit'}
     >
-      {path === '/' ? 'home' : path}
+      {path === '/'
+        ? translations.common.navbar.home
+        : translations.common.navbar[path]}
     </Link>
   );
 };
@@ -35,6 +40,7 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const lang = useAppSelector((state) => state.lang);
+  const i18nLang = useAppSelector((state) => state.i18n.lang);
 
   const cl = consoleLogger(viteMode, 'NavBar.tsx');
 
@@ -59,9 +65,14 @@ export default function Navbar() {
           </Stack>
           {user && <Button onClick={handleLogout}>Logout</Button>}
           <Button onClick={() => dispatch(toggleLanguage())}>
-            {lang === 'en'
-              ? lang.toLocaleUpperCase()
-              : lang.toLocaleUpperCase()}
+            {lang === 'en' ? lang : lang}
+          </Button>
+          <Button
+            onClick={() =>
+              dispatch(setLanguage(i18nLang === 'en' ? 'pl' : 'en'))
+            }
+          >
+            {i18nLang === 'en' ? i18nLang + ' i18n' : i18nLang + ' i18n'}
           </Button>
         </Toolbar>
       </AppBar>
