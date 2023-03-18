@@ -9,8 +9,9 @@ import { Link as RouterLink, useMatch } from 'react-router-dom';
 import { logOut } from '../features/auth/authSlice';
 import { LanguageCodes, languages } from '../features/i18n/i18nConfig';
 import { setLanguage } from '../features/i18n/i18nSlice';
-import { useAppDispatch, useAppSelector } from '../hooks/redux-hooks';
+import { useAppDispatch } from '../hooks/redux-hooks';
 import useAuth from '../hooks/useAuth';
+import { useI18n } from '../hooks/useI18n';
 import { type Paths, paths } from '../routes/paths';
 import { consoleLogger } from '../utils/consoleLogger';
 import { viteMode } from '../utils/viteMode';
@@ -20,7 +21,7 @@ interface NavLinkProps {
 }
 
 const NavLink = ({ path }: NavLinkProps) => {
-  const translations = useAppSelector((state) => state.i18n.translations);
+  const { translation } = useI18n();
 
   const match = useMatch(path);
   return (
@@ -32,14 +33,14 @@ const NavLink = ({ path }: NavLinkProps) => {
       color={match ? 'primary' : 'inherit'}
     >
       {path === '/'
-        ? translations.common.navbar.home
-        : translations.common.navbar[path]}
+        ? translation.common.navbar.home
+        : translation.common.navbar[path]}
     </Link>
   );
 };
 
 const SelectLang = () => {
-  const i18nLang = useAppSelector((state) => state.i18n.lang);
+  const { lang } = useI18n();
   const dispatch = useAppDispatch();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -62,7 +63,7 @@ const SelectLang = () => {
         startIcon={<LanguageIcon />}
         onClick={handleClick}
       >
-        {i18nLang}
+        {lang}
       </Button>
       <Menu
         id="language-menu"
