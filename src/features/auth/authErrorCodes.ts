@@ -18,24 +18,26 @@ type FirebaseAuthErrorTuple = typeof firebaseAuthErrors;
 /**
  * Firebase Auth error codes explicitly handled.
  */
-type HandledAuthErrors = FirebaseAuthErrorTuple[number];
+export type HandledAuthErrorCodes = FirebaseAuthErrorTuple[number];
 
 /**
- * Determines if the code is in one of the handled errors.
+ * Determines if a code is in one of the handled ones.
  *
  * @param code - Firebase AuthError code
  */
 export const isHandledAuthErrorCode = (
   code: unknown
-): code is HandledAuthErrors => {
+): code is HandledAuthErrorCodes => {
   if (typeof code === 'string') {
-    return firebaseAuthErrors.includes(code as HandledAuthErrors);
+    return firebaseAuthErrors.includes(code as HandledAuthErrorCodes);
   }
   return false;
 };
 
+export type AuthErrorMessages = Record<HandledAuthErrorCodes, string>;
+
 export const errorMessages: Record<
-  HandledAuthErrors,
+  HandledAuthErrorCodes,
   { en: string; pl: string }
 > = {
   'auth/wrong-password': {
