@@ -2,24 +2,19 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { RootState } from '../../store';
 import { LanguageCodes } from './i18nConfig';
-import {
-  Common,
-  en as common_en,
-  pl as common_pl,
-} from './translations/common';
+import { en } from './translations/en';
+import { pl } from './translations/pl';
+import { TranslationSchema } from './translations/schema';
 
 interface I18nState {
   lang: LanguageCodes;
-  translations: {
-    common: Common;
-  };
+  translation: TranslationSchema;
 }
+
 const initialState: I18nState = {
   // Default language
   lang: 'en',
-  translations: {
-    common: common_en,
-  },
+  translation: en,
 };
 
 const i18nSlice = createSlice({
@@ -29,13 +24,13 @@ const i18nSlice = createSlice({
     setLanguage: (state, action: PayloadAction<LanguageCodes>) => {
       if (state.lang === action.payload) return;
       state.lang = action.payload;
-      state.translations.common =
-        action.payload === 'en' ? common_en : common_pl;
+      state.translation = action.payload === 'en' ? en : pl;
     },
   },
 });
 
 export const selectLanguage = (state: RootState) => state.i18n.lang;
+export const selectTranslation = (state: RootState) => state.i18n.translation;
 
 export const i18nReducer = i18nSlice.reducer;
 export const { setLanguage } = i18nSlice.actions;

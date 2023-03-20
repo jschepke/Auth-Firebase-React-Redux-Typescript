@@ -14,11 +14,17 @@ const firebaseAuthErrors = [
   AuthErrorCodes.INVALID_PASSWORD,
 ] as const;
 
-type FirebaseAuthErrorTuple = typeof firebaseAuthErrors;
+type FirebaseAuthErrorCodesTuple = typeof firebaseAuthErrors;
 /**
  * Firebase Auth error codes explicitly handled.
  */
-export type HandledAuthErrorCodes = FirebaseAuthErrorTuple[number];
+type HandledFirebaseAuthErrorCodes = FirebaseAuthErrorCodesTuple[number];
+
+/**
+ * All known auth error codes within the app.
+ * @remarks This should be merged with any other error codes used in the app, eg. from other auth providers or custom ones.
+ */
+export type AuthErrorCodes = HandledFirebaseAuthErrorCodes;
 
 /**
  * Determines if a code is in one of the handled ones.
@@ -27,44 +33,9 @@ export type HandledAuthErrorCodes = FirebaseAuthErrorTuple[number];
  */
 export const isHandledAuthErrorCode = (
   code: unknown
-): code is HandledAuthErrorCodes => {
+): code is HandledFirebaseAuthErrorCodes => {
   if (typeof code === 'string') {
-    return firebaseAuthErrors.includes(code as HandledAuthErrorCodes);
+    return firebaseAuthErrors.includes(code as HandledFirebaseAuthErrorCodes);
   }
   return false;
-};
-
-export type AuthErrorMessages = Record<HandledAuthErrorCodes, string>;
-
-export const errorMessages: Record<
-  HandledAuthErrorCodes,
-  { en: string; pl: string }
-> = {
-  'auth/wrong-password': {
-    en: 'Wrong password',
-    pl: 'Hasło nieprawidłowe',
-  },
-  'auth/user-not-found': {
-    en: 'There is no account for this email address. Register',
-    pl: 'Brak konta dla tego adresu mailowego. Zarejestruj się',
-  },
-  'auth/network-request-failed': {
-    pl: `Jesteś offline lub występuje problem z twoim
-        połączeniem internetowym`,
-    en: `You are offline or there is some problem
-        with your internet connection`,
-  },
-  'auth/email-already-in-use': {
-    en: `An account for this email address already exists. Login.`,
-    pl: 'Konto dla tego adresu juz istnieje. Zaloguj się',
-  },
-  'auth/weak-password': {
-    en: 'Password needs to contain ...',
-    pl: 'Hasło musi składać się z ...',
-  },
-};
-
-export const fallbackErrorMessage = {
-  en: 'Something went wrong',
-  pl: 'Coś poszło nie tak',
 };
