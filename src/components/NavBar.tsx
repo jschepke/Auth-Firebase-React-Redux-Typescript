@@ -1,14 +1,21 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LanguageIcon from '@mui/icons-material/Language';
-import { Button, Link, Menu, MenuItem, Stack } from '@mui/material';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { Button, IconButton, Link, Menu, MenuItem, Stack } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link as RouterLink, useMatch } from 'react-router-dom';
 
 import { logOut } from '../features/auth/authSlice';
 import { LanguageCodes, languages } from '../features/i18n/i18nConfig';
 import { setLanguage } from '../features/i18n/i18nSlice';
+import {
+  selectColorMode,
+  toggleColorMode,
+} from '../features/themes/themeSlice';
 import { useAppDispatch } from '../hooks/redux-hooks';
 import useAuth from '../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
@@ -27,10 +34,10 @@ const NavLink = ({ path }: NavLinkProps) => {
   return (
     <Link
       variant="button"
-      underline="hover"
+      underline={match ? 'always' : 'hover'}
       component={RouterLink}
       to={path}
-      color={match ? 'primary' : 'inherit'}
+      color="inherit"
     >
       {path === '/'
         ? translation.common.navbar.home
@@ -56,6 +63,7 @@ const SelectLang = () => {
   return (
     <div>
       <Button
+        color="inherit"
         id="change-language-button"
         aria-controls={open ? 'language-menu' : undefined}
         aria-haspopup="true"
@@ -90,6 +98,21 @@ const SelectLang = () => {
   );
 };
 
+const ToggleColorMode = () => {
+  const themeColorMode = useSelector(selectColorMode);
+  const dispatch = useAppDispatch();
+
+  return (
+    <IconButton
+      color="inherit"
+      aria-label="toggle-theme-mode"
+      onClick={() => dispatch(toggleColorMode())}
+    >
+      {themeColorMode === 'light' ? <LightModeIcon /> : <DarkModeIcon />}
+    </IconButton>
+  );
+};
+
 export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
@@ -115,7 +138,12 @@ export default function Navbar() {
           <Stack spacing={1} direction="row" flexGrow={1}>
             {renderNavLinks}
           </Stack>
-          {user && <Button onClick={handleLogout}>Logout</Button>}
+          {user && (
+            <Button color="inherit" onClick={handleLogout}>
+              Logout
+            </Button>
+          )}
+          <ToggleColorMode />
           <SelectLang />
         </Toolbar>
       </AppBar>
