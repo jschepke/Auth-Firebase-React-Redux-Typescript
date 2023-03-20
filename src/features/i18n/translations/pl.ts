@@ -13,7 +13,7 @@ export const pl: TranslationSchema = {
       or: 'lub',
       redirectToLogin: 'Masz już konto? Zaloguj się tutaj',
       redirectToRegister: 'Nie masz konta? Zarejestruj się tutaj',
-      registerConsent: 'Rejestrując się, zgadzasz się na naszymi',
+      registerConsent: 'Rejestrując się, zgadzasz się z naszymi',
       registerConsent_and: 'i',
       registerConsent_privacyPolicy_link: 'Polityką Prywatności',
       registerConsent_termsOfService_link: 'Warunkami Użytkowania Serwisu',
