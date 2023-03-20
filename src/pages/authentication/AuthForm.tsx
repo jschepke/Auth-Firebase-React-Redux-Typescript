@@ -21,26 +21,27 @@ import { Link as RouterLink } from 'react-router-dom';
 import { z } from 'zod';
 
 import {
+  AuthErrorCodes,
+  isHandledAuthErrorCode,
+} from '../../features/auth/authErrorCodes';
+import {
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
   signInWithGooglePopup,
   signInWithGoogleRedirect,
 } from '../../features/auth/authSlice';
-import {
-  errorMessages as errorMessagesPredefined,
-  fallbackErrorMessage,
-  isHandledAuthErrorCode,
-} from '../../features/auth/errorMessages';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux-hooks';
+import { ValidationErrorCodes } from '../../features/i18n/translations/schema';
+import { useAppDispatch } from '../../hooks/redux-hooks';
 import useAuth from '../../hooks/useAuth';
+import { useI18n } from '../../hooks/useI18n';
 import { authPersistence } from '../../utils/authPersistence';
 import { consoleLogger } from '../../utils/consoleLogger';
 import { viteMode } from '../../utils/viteMode';
 import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
-  const loadingStatus = useAuth().loadingStatus;
-  const lang = useAppSelector((state) => state.lang);
+  const { loadingStatus } = useAuth();
+  const { translation } = useI18n();
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const mediaQueryMatches = useMediaQuery(theme.breakpoints.up('md'));
@@ -51,11 +52,11 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessages, setErrorMessages] = useState<{
-    email: null | string;
-    password: null | string;
-    auth: null | string;
-  }>({ email: null, password: null, auth: null });
+  const [errorCodes, setErrorCodes] = useState<{
+    auth: AuthErrorCodes | string | null;
+    emailValidation: ValidationErrorCodes | string | null;
+    passwordValidation: ValidationErrorCodes | string | null;
+  }>({ auth: null, emailValidation: null, passwordValidation: null });
 
   useEffect(() => {
     if (!keepSignedIn) {
@@ -65,39 +66,40 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
   const variantSpecs = {
     login: {
-      title: 'Login',
+      title: translation.common.auth.loginTitle,
       redirection: {
-        text: "Don't have an account? Sign up here",
+        text: translation.common.auth.redirectToRegister,
         path: '/register',
       },
     },
     register: {
-      title: 'Sign up',
+      title: translation.common.auth.registerTitle,
       redirection: {
-        text: 'Already have an account? Login here',
+        text: translation.common.auth.redirectToLogin,
         path: '/login',
       },
     },
   };
 
   const validateEmail = (value: string) => {
+    const code: ValidationErrorCodes = 'email_invalid';
     const validationEmail = z.string().email({
-      message: lang === 'en' ? 'Invalid email' : 'Email niepoprawny',
+      message: code,
     });
     try {
       validationEmail.parse(value);
-      setErrorMessages((prevState) => ({
-        email: '',
-        password: prevState.password,
+      setErrorCodes((prevState) => ({
+        emailValidation: null,
+        passwordValidation: prevState.passwordValidation,
         auth: prevState.auth,
       }));
     } catch (error) {
       if (error instanceof z.ZodError) {
         const issue = error.issues[0];
 
-        setErrorMessages((prevState) => ({
-          email: issue.message,
-          password: prevState.password,
+        setErrorCodes((prevState) => ({
+          emailValidation: issue.message,
+          passwordValidation: prevState.passwordValidation,
           auth: prevState.auth,
         }));
       }
@@ -105,32 +107,30 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   };
 
   const validatePassword = (value: string) => {
+    const tooShort: ValidationErrorCodes = 'password_tooShort';
+    const tooLong: ValidationErrorCodes = 'password_tooLong';
     const validationPassword = z
       .string()
       .min(8, {
-        message:
-          lang === 'en'
-            ? 'Must be at least 8 more characters'
-            : 'Hasło musi zawierać co najmniej 8 znaków',
+        message: tooShort,
       })
       .max(255, {
-        message:
-          lang === 'en' ? 'Password is too long' : 'Hasło jest za długie',
+        message: tooLong,
       });
     try {
       validationPassword.parse(value);
-      setErrorMessages((prevState) => ({
-        email: prevState.email,
-        password: '',
+      setErrorCodes((prevState) => ({
+        emailValidation: prevState.emailValidation,
+        passwordValidation: null,
         auth: prevState.auth,
       }));
     } catch (error) {
       if (error instanceof z.ZodError) {
         const issue = error.issues[0];
 
-        setErrorMessages((prevState) => ({
-          email: prevState.email,
-          password: issue.message,
+        setErrorCodes((prevState) => ({
+          emailValidation: prevState.emailValidation,
+          passwordValidation: issue.message,
           auth: prevState.auth,
         }));
       }
@@ -163,8 +163,8 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     if (
       !email ||
       !password ||
-      Boolean(errorMessages.email) ||
-      Boolean(errorMessages.password)
+      Boolean(errorCodes.emailValidation) ||
+      Boolean(errorCodes.passwordValidation)
     ) {
       validateEmail(email);
       validatePassword(password);
@@ -227,23 +227,27 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
     }
 
     if (isHandledAuthErrorCode(code)) {
-      setErrorMessages({
-        ...errorMessages,
-        auth: errorMessagesPredefined[code][lang],
+      setErrorCodes({
+        ...errorCodes,
+        auth: code,
       });
       return;
     }
 
-    setErrorMessages({
-      ...errorMessages,
-      auth: fallbackErrorMessage[lang],
+    setErrorCodes({
+      ...errorCodes,
+      auth: 'Unknown Error',
     });
   };
 
   const handleFormReset = () => {
     setEmail('');
     setPassword('');
-    setErrorMessages({ email: null, password: null, auth: null });
+    setErrorCodes({
+      auth: null,
+      emailValidation: null,
+      passwordValidation: null,
+    });
     setShowPassword(false);
   };
 
@@ -272,19 +276,27 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
         <Grid item xs={12} sx={{ mt: 2 }}>
           <Divider textAlign="center">
-            <Typography variant="caption">or</Typography>
+            <Typography variant="caption">
+              {translation.common.auth.or}
+            </Typography>
           </Divider>
         </Grid>
 
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Email"
+            label={translation.common.auth.email_label}
             type="email"
-            placeholder="Enter email address"
+            placeholder={translation.common.auth.email_placeholder}
             margin="normal"
-            error={Boolean(errorMessages.email)}
-            helperText={errorMessages.email || false}
+            error={Boolean(errorCodes.emailValidation)}
+            helperText={
+              errorCodes.emailValidation
+                ? translation.validation[
+                    errorCodes.emailValidation as ValidationErrorCodes
+                  ]
+                : false
+            }
             name="email"
             value={email}
             onChange={(event) => {
@@ -296,14 +308,20 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
 
           <TextField
             fullWidth
-            label="Password"
+            label={translation.common.auth.password_label}
             type={showPassword ? 'text' : 'password'}
-            placeholder="Enter password"
+            placeholder={translation.common.auth.password_placeholder}
             margin="normal"
             name="password"
             value={password}
-            error={Boolean(errorMessages.password)}
-            helperText={errorMessages.password || false}
+            error={Boolean(errorCodes.passwordValidation)}
+            helperText={
+              errorCodes.passwordValidation
+                ? translation.validation[
+                    errorCodes.passwordValidation as ValidationErrorCodes
+                  ]
+                : false
+            }
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -345,16 +363,20 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
                     }}
                   />
                 }
-                label={<Typography variant="body2">Keep me sign in</Typography>}
+                label={
+                  <Typography variant="body2">
+                    {translation.common.auth.keepMeLoggedIn}
+                  </Typography>
+                }
               />
               <Link
                 variant="body2"
-                underline="none"
+                underline="hover"
                 component={RouterLink}
                 to=""
                 color="inherit"
               >
-                Forgot Password?
+                {translation.common.auth.forgotPassword}
               </Link>
             </Stack>
           </Grid>
@@ -364,23 +386,24 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
           <Grid item xs={12} mb={1}>
             <Stack>
               <Typography variant="caption" textAlign="center">
-                By Signing up, you agree to our &nbsp;
+                {translation.common.auth.registerConsent} &nbsp;
                 <Link variant="caption" component={RouterLink} to="#">
-                  Terms of Service
+                  {translation.common.auth.registerConsent_termsOfService_link}
                 </Link>
-                &nbsp; and &nbsp;
+                &nbsp; {translation.common.auth.registerConsent_and} &nbsp;
                 <Link variant="caption" component={RouterLink} to="#">
-                  Privacy Policy
+                  {translation.common.auth.registerConsent_privacyPolicy_link}.
                 </Link>
               </Typography>
             </Stack>
           </Grid>
         )}
 
-        {errorMessages.auth && (
+        {errorCodes.auth && (
           <Grid item xs={12} sx={{ textAlign: 'center' }}>
             <Typography variant="body1" sx={{ color: 'error.main' }}>
-              {errorMessages.auth}
+              {translation.errors.auth[errorCodes.auth as AuthErrorCodes] ??
+                translation.errors.fallbackMessage}
             </Typography>
           </Grid>
         )}
@@ -405,8 +428,11 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
               component={RouterLink}
               to={variantSpecs[variant].redirection.path}
               variant="body2"
-              color="primary"
-              sx={{ textDecoration: 'none' }}
+              color="inherit"
+              sx={{
+                textDecoration: 'none',
+                ':hover': { textDecorationLine: 'underline' },
+              }}
               textAlign="center"
             >
               {variantSpecs[variant].redirection.text}
