@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
 import { Layout } from '../components/Layout';
-// import { SymbolButtons } from '../utils/keybordSymb/KeyboardSymbolsComponent';
 
 /**
  * Root route component.
@@ -10,7 +9,6 @@ import { Layout } from '../components/Layout';
 export const Root = () => {
   return (
     <Layout>
-      {/* <SymbolButtons /> */}
       <Outlet />
     </Layout>
   );
