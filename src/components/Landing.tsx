@@ -1,136 +1,108 @@
 import {
   Box,
-  Button,
   Container,
-  Link,
-  List,
-  ListItem,
-  Paper,
+  Grid,
+  IconButton,
+  SvgIconProps,
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
-import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { paths } from '../routes/paths';
+import {
+  FirebaseIcon,
+  MuiIcon,
+  ReactIcon,
+  ReduxIcon,
+  TypescriptIcon,
+} from './customIcons';
+
+interface Icon {
+  name: string;
+  href: string;
+  icon: (props: SvgIconProps) => JSX.Element;
+}
+
+const IconData: Icon[] = [
+  { name: 'React', href: 'https://react.dev/', icon: ReactIcon },
+  {
+    name: 'Redux',
+    href: 'https://redux.js.org/',
+    icon: ReduxIcon,
+  },
+  {
+    name: 'Material UI',
+    href: 'https://mui.com/',
+    icon: MuiIcon,
+  },
+  {
+    name: 'Firebase',
+    href: 'https://firebase.google.com/',
+    icon: FirebaseIcon,
+  },
+  {
+    name: 'Typescript',
+    href: 'https://www.typescriptlang.org/',
+    icon: TypescriptIcon,
+  },
+];
+
+const Icons = () => {
+  return (
+    <Grid item xs={12}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-around',
+        }}
+      >
+        {IconData.map((icon) => {
+          const { name, href, icon: Icon } = icon;
+          return (
+            <Tooltip key={name} title={name}>
+              <IconButton href={href}>
+                <Icon sx={{ fontSize: { xs: 60, sm: 80 } }} />
+              </IconButton>
+            </Tooltip>
+          );
+        })}
+      </Box>
+    </Grid>
+  );
+};
 
 export const Landing = () => {
-  const [title, setTitle] = useState<
-    | 'Click to copy'
-    | '✅ Copied!'
-    | '⚠️ Something went wrong. Try to copy manually.'
-  >('Click to copy');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_value, copy] = useCopyToClipboard();
-
-  const handleCopyToClipboard = async (text: string) => {
-    const result = await copy(text);
-    result
-      ? setTitle('✅ Copied!')
-      : setTitle('⚠️ Something went wrong. Try to copy manually.');
-  };
-
-  const handleTooltipOnOpen = () => {
-    if (title !== 'Click to copy') setTitle('Click to copy');
-  };
   return (
-    <Container>
-      <Box m={2}>
-        <Paper>
-          <Box p={2}>
-            <Typography gutterBottom variant="h5">
-              Welcome!
+    <Container maxWidth="md">
+      <Box>
+        <Grid container mt={{ xs: 5, sm: 7, md: 10 }} spacing={5}>
+          <Grid item xs={12}>
+            <Typography variant="h6" align="center">
+              Welcome to the demo app for
             </Typography>
-            <Typography gutterBottom variant="body1">
-              The{' '}
-              <Link component={RouterLink} to={paths.root}>
-                base route
-              </Link>{' '}
-              is public. Anyone can see it regardless of authentication state.
+          </Grid>
+          <Grid item xs={12} mb={3}>
+            <Typography
+              color="primary"
+              align="center"
+              sx={{
+                fontWeight: 'bold',
+                wordBreak: 'break-all',
+                typography: { xs: 'h4', sm: 'h2', md: 'h1' },
+              }}
+            >
+              AUTHENTICATION
             </Typography>
-            <Typography gutterBottom variant="body1">
-              The{' '}
-              <Link component={RouterLink} to={paths.dashboard}>
-                dashboard
-              </Link>{' '}
-              is a protected route. You need to{' '}
-              <Link component={RouterLink} to={paths.login}>
-                log in
-              </Link>{' '}
-              to see its content.
+          </Grid>
+
+          <Icons />
+
+          <Grid item xs={12} mt={5} mb={5}>
+            <Typography variant="h6" align="center">
+              Checkout the repo and docs
             </Typography>
-            <Typography gutterBottom variant="body1">
-              Once you have logged in, try to go to{' '}
-              <Link component={RouterLink} to={paths.login}>
-                login
-              </Link>{' '}
-              or{' '}
-              <Link component={RouterLink} to={paths.register}>
-                register
-              </Link>{' '}
-              again. The auth state is observed on these routes and if you are
-              logged in, you will be redirected to the dashboard.
-            </Typography>
-            <Typography variant="body1">
-              You can also try to copy entire urls and paste them into new
-              browser tab. You may have noticed a progress bar as a result of
-              the auth state being checked.
-            </Typography>
-            <List>
-              <ListItem>
-                <Tooltip title={title} onOpen={handleTooltipOnOpen}>
-                  <Button
-                    centerRipple
-                    variant="text"
-                    sx={{ textTransform: 'inherit' }}
-                    onClick={() =>
-                      handleCopyToClipboard(window.location.href + paths.login)
-                    }
-                  >
-                    {window.location.href + paths.login}
-                  </Button>
-                </Tooltip>
-              </ListItem>
-              <ListItem>
-                <Tooltip
-                  title={title}
-                  placement="right-end"
-                  onOpen={handleTooltipOnOpen}
-                >
-                  <Button
-                    centerRipple
-                    variant="text"
-                    sx={{ textTransform: 'inherit' }}
-                    onClick={() =>
-                      handleCopyToClipboard(
-                        window.location.href + paths.register
-                      )
-                    }
-                  >
-                    {window.location.href + paths.register}
-                  </Button>
-                </Tooltip>
-              </ListItem>
-              <ListItem>
-                <Tooltip title={title} onOpen={handleTooltipOnOpen}>
-                  <Button
-                    centerRipple
-                    variant="text"
-                    sx={{ textTransform: 'inherit' }}
-                    onClick={() =>
-                      handleCopyToClipboard(
-                        window.location.href + paths.dashboard
-                      )
-                    }
-                  >
-                    {window.location.href + paths.dashboard}
-                  </Button>
-                </Tooltip>
-              </ListItem>
-            </List>
-          </Box>
-        </Paper>
+          </Grid>
+        </Grid>
       </Box>
     </Container>
   );
