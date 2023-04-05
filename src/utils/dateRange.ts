@@ -1,4 +1,4 @@
-import { DateTime, Zone } from 'luxon';
+import { DateTime } from 'luxon';
 
 export enum Weekday {
   Monday = 1,
@@ -10,29 +10,33 @@ export enum Weekday {
   Sunday,
 }
 
+/**
+ * TODO add detailed description how to use config
+ */
 interface DateRangeConfig {
   /**
    * Reference date for the range to be returned.
-   * @remarks default: `current time`
+   * @remarks default to `current date`
    *
    * @example
    * ```
-   * new DateRange({ initDate: DateTime.fromISO('2023-05-15') });
+   * new DateRange().week({ refDate: DateTime.fromISO('2023-05-15') });
    * ```
    */
-  date?: DateTime;
+  refDate?: DateTime | Date;
 
   /**
-   * The first weekday for week interval.
+   * The weekday to be used as the first day of a week range.
    *
-   * @remarks default to `Monday`
+   *@remarks Default to Monday.
    *
    *@example
    * ```
-   * new DateRange().week({ firstWeekday: Weekday.Sunday }); // the range will start from Sunday
+   * // the range will start from Sunday
+   * new DateRange().week({refDate: someDate, refWeekday: Weekday.Sunday });
    * ```
    */
-  firstWeekday?: Weekday;
+  refWeekday?: Weekday;
 
   /**
    * Todo *
@@ -44,47 +48,69 @@ interface DateRangeConfig {
    * ```
    */
   // offset?;
-
-  /**
-   * Zone identifier. "Set" the DateTime's zone to specified zone.
-   *
-   * @remarks default: `"local"`
-   *
-   * @example
-   * IANA string, such as
-   *
-   * ```
-   * "America/New_York"
-   * or
-   * "UTC+3"
-   * ```
-   * More about zones:
-   *
-   * {@link https://moment.github.io/luxon/#/zones}
-   *
-   * {@link https://moment.github.io/luxon/api-docs/index.html#datetimesetzone}
-   *
-   */
-  zone?: Zone;
 }
 
-export class DateRange implements DateRangeConfig {
-  date;
-  firstWeekday;
+// TODO
+interface IDateRange {
   dates: DateTime[];
-  zone: undefined;
+  getLuxonDates(): DateTime[];
+  toMilliseconds(): number[];
+  eachDayOfWeek(config?: DateRangeConfig): DateRange;
+  eachDayOfMonth(config?: DateRangeConfig): DateRange;
+}
+
+export class DateRange {
+  //TODO implement better suited interface to implement class
+
+  /**
+   * @remarks `Readonly` - serves as default value for DateRange instance.
+   */
+  private _refDate: DateTime;
+
+  /**
+   * @remarks `Readonly` - serves as default value for DateRange instance.
+   */
+  private _refWeekday: Weekday;
+
+  /**
+   * Instance dates storage. Don't access directly. Instead use getter methods.
+   */
+  private _dates: DateTime[];
 
   constructor() {
-    this.date = DateTime.now();
-    this.firstWeekday = Weekday.Monday;
-    this.dates = [];
+    if (arguments.length > 0) {
+      throw new Error('DateRange constructor does not accept any parameters');
+    }
+
+    this._refDate = DateTime.now();
+    this._refWeekday = Weekday.Monday;
+    this._dates = [];
   }
 
   /**
-   * Returns array of Luxon DateTime objects
+   * Returns an array of Luxon DateTime objects
    */
   getLuxonDates(): DateTime[] {
-    return this.dates;
+    return this._dates;
+  }
+
+  get refDate(): DateTime {
+    return this._refDate;
+  }
+
+  get refWeekday(): Weekday {
+    return this._refWeekday;
+  }
+
+  get dates(): DateTime[] {
+    return this._dates;
+  }
+
+  /**
+   * Returns an array of JavaScript Date objects
+   */
+  getJSDates(): Date[] {
+    return this._dates.map((date) => date.toJSDate());
   }
 
   /**
@@ -93,49 +119,91 @@ export class DateRange implements DateRangeConfig {
    * @returns Array of milliseconds
    */
   toMilliseconds(): number[] {
-    return this.dates.map((date) => date.valueOf());
+    return this._dates.map((date) => date.valueOf());
   }
 
   /**
-   * Creates a date for each day for a week range related to reference date.
+   * Returns an array of dates in ISOTime format
+   *
+   * @returns Array of dates in ISOTime format
+   */
+  toISOTime(): string[] {
+    return this._dates.map((date) => date.toISOTime());
+  }
+
+  /**
+   * @returns Array of dates in ISODate format
+   */
+  toISODate(): string[] {
+    return this._dates.map((date) => date.toISODate());
+  }
+
+  /**
+   * @returns Array of dates in ISO format
+   */
+  toISO(): string[] {
+    return this._dates.map((date) => date.toISO());
+  }
+
+  //TODO Change to return boolean, move error somewhere else
+  private _validateRefDate(refDate: DateTime | Date | unknown): void {
+    const isDate: boolean = refDate instanceof Date;
+    const isValidDateTime: boolean =
+      refDate instanceof DateTime && refDate.isValid;
+
+    if (!isDate && !isValidDateTime) {
+      throw new Error(
+        `Invalid date. Date must be typeof Date or to be valid Luxon DateTime`
+      );
+    }
+  }
+
+  /**
+   * Creates a date for each day of a week range related to reference date.
    *
    * By default, the range starts on Monday before or at the reference date.
+   * Each date starts at its beginning.
    *
    * The date range can be specified by passing a `config` object.
    *
-   * @param config - // TODO
-   * @returns The DateRange instance with the dates array populated.
+   * @param config - {@link DateRangeConfig}
+   * @returns The `DateRange` instance with the dates array populated.
    *
    * @example //TODO
    */
   eachDayOfWeek(config?: DateRangeConfig) {
-    const {
-      date = this.date,
-      firstWeekday = this.firstWeekday,
-      //TODO
-      //zone
-    } = config || this;
+    const { refDate = this._refDate, refWeekday = this._refWeekday } =
+      config || {};
+
+    this._validateRefDate(refDate);
+
+    // Set date at the beginning of a day
+    let firstDate: DateTime;
+    if (refDate instanceof Date) {
+      firstDate = DateTime.fromJSDate(refDate).startOf('day');
+    } else {
+      firstDate = refDate.startOf('day');
+    }
 
     // Find the first date of a week range for reference date
-    let firstDate = date;
-    while (firstDate.weekday !== firstWeekday) {
+    while (firstDate.weekday !== refWeekday) {
       firstDate = firstDate.minus({ days: 1 });
     }
 
     // Clear the existing dates array
-    this.dates = [];
+    this._dates = [];
 
     let currentWeekDate = firstDate;
     for (let i = 0; i < 7; i++) {
-      this.dates.push(currentWeekDate);
+      this._dates.push(currentWeekDate);
       currentWeekDate = currentWeekDate.plus({ days: 1 });
     }
 
     return this;
   }
 
-  eachDayOfMonth(): DateRange {
-    const { date: initDate, firstWeekday: beginningWeekday } = this;
+  /* eachDayOfMonth(): DateRange {
+    const { refDate: initDate, refWeekday: beginningWeekday } = this;
 
     // Get the first day of the current month
     const firstDayOfMonth = initDate.startOf('month');
@@ -159,7 +227,7 @@ export class DateRange implements DateRangeConfig {
     }
 
     return this;
-  }
+  } */
 
   days(/* number of days */) {
     //...
