@@ -63,17 +63,17 @@ export class DateRange {
   //TODO implement better suited interface to implement class
 
   /**
-   * @remarks `Readonly` - serves as default value for DateRange instance.
+   * @remarks Default value for DateRange instance, equals to current time.
    */
   private _refDate: DateTime;
 
   /**
-   * @remarks `Readonly` - serves as default value for DateRange instance.
+   * @remarks Default value for DateRange instance, equals to 1 (Monday)
    */
   private _refWeekday: Weekday;
 
   /**
-   * Instance dates storage. Don't access directly. Instead use getter methods.
+   * Instance dates storage.
    */
   private _dates: DateTime[];
 
@@ -85,13 +85,6 @@ export class DateRange {
     this._refDate = DateTime.now();
     this._refWeekday = Weekday.Monday;
     this._dates = [];
-  }
-
-  /**
-   * Returns an array of Luxon DateTime objects
-   */
-  getLuxonDates(): DateTime[] {
-    return this._dates;
   }
 
   get refDate(): DateTime {
@@ -106,10 +99,68 @@ export class DateRange {
     return this._dates;
   }
 
+  /*================================ VALIDATION METHODS ==============================*/
+
+  public isValidDateRef(refDate: unknown): boolean {
+    return this._isValidDateRef(
+      this._isValidDate(refDate),
+      this._isValidDateTime(refDate)
+    );
+  }
+
+  private _validateRefDate(refDate: unknown): void {
+    if (!this.isValidDateRef(refDate)) {
+      throw new Error(
+        `Invalid date. Date must be typeof Date or to be valid Luxon DateTime`
+      );
+    }
+  }
+
+  private _isValidDateRef(
+    isValidDate: boolean,
+    isValidDateTime: boolean
+  ): boolean {
+    if (isValidDate || isValidDateTime) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private _isValidDateTime(date: unknown): date is DateTime {
+    if (date instanceof DateTime && date.isValid) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private _isValidDate(date: unknown): date is Date {
+    if (!(date instanceof Date)) {
+      return false;
+    }
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /*================================ CONVERTING METHODS ==============================*/
+
+  /**
+   * Returns an array of Luxon DateTime objects
+   */
+  toLuxonDates(): DateTime[] {
+    return this._dates;
+  }
+
   /**
    * Returns an array of JavaScript Date objects
    */
-  getJSDates(): Date[] {
+  toJSDates(): Date[] {
     return this._dates.map((date) => date.toJSDate());
   }
 
@@ -145,18 +196,9 @@ export class DateRange {
     return this._dates.map((date) => date.toISO());
   }
 
-  //TODO Change to return boolean, move error somewhere else
-  private _validateRefDate(refDate: DateTime | Date | unknown): void {
-    const isDate: boolean = refDate instanceof Date;
-    const isValidDateTime: boolean =
-      refDate instanceof DateTime && refDate.isValid;
+  // ..other converting methods
 
-    if (!isDate && !isValidDateTime) {
-      throw new Error(
-        `Invalid date. Date must be typeof Date or to be valid Luxon DateTime`
-      );
-    }
-  }
+  /*================================ TIME RANGE METHODS ==============================*/
 
   /**
    * Creates a date for each day of a week range related to reference date.
@@ -232,6 +274,4 @@ export class DateRange {
   days(/* number of days */) {
     //...
   }
-
-  // ..other converting methods
 }

@@ -38,10 +38,130 @@ describe('DateRange', () => {
     });
   });
 
+  describe('_isValidDateTime', () => {
+    it('returns true for valid DateTime', () => {
+      const date = DateTime.local(2022, 1, 1);
+      const result = new DateRange()['_isValidDateTime'](date);
+      expect(result).toBe(true);
+    });
+
+    it('returns false for invalid DateTime', () => {
+      const date = DateTime.fromObject({ year: 2022, month: 13, day: 32 });
+      const result = new DateRange()['_isValidDateTime'](date);
+      expect(result).toBe(false);
+    });
+
+    it('returns false for non-DateTime object', () => {
+      const date = new Date('2022-01-01');
+      const result = new DateRange()['_isValidDateTime'](date);
+      expect(result).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      const date = null;
+      const result = new DateRange()['_isValidDateTime'](date);
+      expect(result).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      const date = undefined;
+      const result = new DateRange()['_isValidDateTime'](date);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('_isValidDate', () => {
+    it('should return true if the input is a valid Date object', () => {
+      const date = new Date('2022-04-06T12:00:00.000Z');
+      expect(new DateRange()['_isValidDate'](date)).toBe(true);
+    });
+
+    it('should return false if the input is not a Date object', () => {
+      const date = '2022-04-06T12:00:00.000Z';
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is an invalid Date object', () => {
+      const date = new Date('invalid-date');
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is a valid date string', () => {
+      const date = '2022-04-06T12:00:00.000Z';
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is an invalid date string', () => {
+      const date = 'invalid-date';
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is a number', () => {
+      const date = 12345;
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is null', () => {
+      const date = null;
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+
+    it('should return false if the input is undefined', () => {
+      const date = undefined;
+      expect(new DateRange()['_isValidDate'](date)).toBe(false);
+    });
+  });
+
+  describe('_isValidDateRef', () => {
+    it('returns true if isValidDate is true and isValidDateTime is true', () => {
+      const dateRange = new DateRange();
+      const result = dateRange['_isValidDateRef'](true, true);
+      expect(result).toBe(true);
+    });
+
+    it('returns true if isValidDate is true and isValidDateTime is false', () => {
+      const dateRange = new DateRange();
+      const result = dateRange['_isValidDateRef'](true, false);
+      expect(result).toBe(true);
+    });
+
+    it('returns true if isValidDate is false and isValidDateTime is true', () => {
+      const dateRange = new DateRange();
+      const result = dateRange['_isValidDateRef'](false, true);
+      expect(result).toBe(true);
+    });
+
+    it('returns false if isValidDate is false and isValidDateTime is false', () => {
+      const dateRange = new DateRange();
+      const result = dateRange['_isValidDateRef'](false, false);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isValidDateRef', () => {
+    it('returns true if refDate is a valid Date object', () => {
+      const dateRange = new DateRange();
+      const result = dateRange.isValidDateRef(new Date());
+      expect(result).toBe(true);
+    });
+
+    it('returns true if refDate is a valid Luxon DateTime object', () => {
+      const dateRange = new DateRange();
+      const result = dateRange.isValidDateRef(DateTime.now());
+      expect(result).toBe(true);
+    });
+
+    it('returns false if refDate is not a valid Date or Luxon DateTime object', () => {
+      const dateRange = new DateRange();
+      const result = dateRange.isValidDateRef('not a valid date');
+      expect(result).toBe(false);
+    });
+  });
+
   describe('eachDayOfWeek', () => {
     it('should return an array of 7 luxon DateTime objects for the current week', () => {
       const dateRange = new DateRange();
-      const dates = dateRange.eachDayOfWeek().getLuxonDates();
+      const dates = dateRange.eachDayOfWeek().toLuxonDates();
       dates.forEach((date) => expect(DateTime.isDateTime(date)).toBeTruthy());
       expect(dates).toHaveLength(7);
       // Use snapshots to compare the output with a previous version
@@ -49,7 +169,7 @@ describe('DateRange', () => {
     });
     test('each date of an array should start at the beginning of the date', () => {
       const dateRange = new DateRange();
-      const dates = dateRange.eachDayOfWeek().getLuxonDates();
+      const dates = dateRange.eachDayOfWeek().toLuxonDates();
       dates.forEach((date) => {
         expect(date.toISO()).toBe(date.startOf('day').toISO());
       });
@@ -58,7 +178,7 @@ describe('DateRange', () => {
     it('should return return an array with first element to be date <= refDate', () => {
       const dateRange = new DateRange();
       const { refDate } = dateRange;
-      const date = dateRange.eachDayOfWeek().getLuxonDates()[0];
+      const date = dateRange.eachDayOfWeek().toLuxonDates()[0];
       console.log(
         `date: ${date.toISODate()}, initDate: ${refDate.toISODate()}`
       );
@@ -77,7 +197,7 @@ describe('DateRange', () => {
             refWeekday: Weekday[weekday],
             refDate: initDate,
           })
-          .getLuxonDates();
+          .toLuxonDates();
         const date = dates[0];
         // console.log(
         //   `weekday: ${weekday} date: ${date.toLocaleString({
@@ -94,13 +214,13 @@ describe('DateRange', () => {
     it('should Monday be in first date of an array for default config of beginningWeekday', () => {
       const dateRange = new DateRange();
       const { refWeekday } = dateRange;
-      const date = dateRange.eachDayOfWeek().getLuxonDates()[0];
+      const date = dateRange.eachDayOfWeek().toLuxonDates()[0];
       expect(date.weekday).toEqual(refWeekday);
 
       getRandomDates(10).forEach((randomDate) => {
         const firstDateInArray = dateRange
           .eachDayOfWeek({ refDate: randomDate })
-          .getLuxonDates()[0];
+          .toLuxonDates()[0];
         expect(firstDateInArray.weekday).toEqual(refWeekday);
       });
     });
@@ -109,7 +229,7 @@ describe('DateRange', () => {
       const dateRange = new DateRange();
       let iterations = 0;
       do {
-        const dates = dateRange.eachDayOfWeek().getLuxonDates();
+        const dates = dateRange.eachDayOfWeek().toLuxonDates();
         expect(dates).toHaveLength(7);
         iterations += 1;
       } while (iterations <= 3);
@@ -117,7 +237,7 @@ describe('DateRange', () => {
 
     it('should convert dates to milliseconds', () => {
       const dateRange = new DateRange();
-      const dates = dateRange.eachDayOfWeek().getLuxonDates();
+      const dates = dateRange.eachDayOfWeek().toLuxonDates();
       const milliseconds = dateRange.toMilliseconds();
       expect(milliseconds).toHaveLength(7);
       // Use map and valueOf methods to convert dates to milliseconds
@@ -152,7 +272,7 @@ describe('DateRange', () => {
   describe.skip('eachDayOfMonth', () => {
     it('should return an array of dates for the current month', () => {
       const dateRange = new DateRange();
-      const dates = dateRange.eachDayOfMonth().getLuxonDates();
+      const dates = dateRange.eachDayOfMonth().toLuxonDates();
       expect(dates).toHaveLength(35);
       // Use snapshots to compare the output with a previous version
       expect(dates).toMatchSnapshot();
