@@ -1,9 +1,13 @@
+/* eslint-disable max-len */
 import { DateTime } from 'luxon';
 
 import { isValidDateTime } from './isValidDateTime';
 
 /**
- * Checks if a given Luxon DateTime object is present in a given array of Luxon DateTime objects.
+ * Checks if a given luxon DateTime object is present in a given array of Luxon DateTime objects.
+ *
+ * @remarks Function uses DateTime.equals() to compare dates which is strick equality check.
+ * Read more at {@link https://moment.github.io/luxon/api-docs/index.html#datetimeequals | DateTime equals}
  *
  * @param date - The date to check.
  * @param array - The array of dates to search in.
