@@ -21,6 +21,8 @@ interface RandomDateTimesOptions {
 /**
  * Returns an array of random luxon DateTime objects within a given range.
  *
+ * @remarks Returns an array with one date if not specified otherwise in options.
+ *
  * @param options - An object with optional parameters for the function.
  * See {@link RandomDateTimesOptions} for details.
  * @returns An array of random dates.
