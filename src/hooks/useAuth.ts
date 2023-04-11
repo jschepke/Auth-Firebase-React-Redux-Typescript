@@ -14,7 +14,7 @@ import {
 import { auth } from '../services/firebase/firebase';
 import { authPersistence } from '../utils/authPersistence';
 import { consoleLogger } from '../utils/consoleLogger';
-import { viteMode } from '../utils/viteMode';
+import { getCurrentViteMode } from '../utils/getCurrentViteMode';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 
 const useAuth = () => {
@@ -22,7 +22,7 @@ const useAuth = () => {
   const loadingStatus = useAppSelector((state) => state.auth.loadingStatus);
   const dispatch = useAppDispatch();
 
-  const log = consoleLogger(viteMode, 'useAuth.ts');
+  const log = consoleLogger(getCurrentViteMode(), 'useAuth.ts');
 
   useEffect(() => {
     let ignore = false;

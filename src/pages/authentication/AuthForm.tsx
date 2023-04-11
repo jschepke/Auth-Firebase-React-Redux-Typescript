@@ -36,7 +36,7 @@ import useAuth from '../../hooks/useAuth';
 import { useI18n } from '../../hooks/useI18n';
 import { authPersistence } from '../../utils/authPersistence';
 import { consoleLogger } from '../../utils/consoleLogger';
-import { viteMode } from '../../utils/viteMode';
+import { getCurrentViteMode } from '../../utils/getCurrentViteMode';
 import type { AuthPageProps } from './AuthPage';
 
 export const AuthForm = ({ variant }: AuthPageProps) => {
@@ -46,7 +46,7 @@ export const AuthForm = ({ variant }: AuthPageProps) => {
   const theme = useTheme();
   const mediaQueryMatches = useMediaQuery(theme.breakpoints.up('md'));
 
-  const log = consoleLogger(viteMode, 'AuthForm.tsx');
+  const log = consoleLogger(getCurrentViteMode(), 'AuthForm.tsx');
 
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [showPassword, setShowPassword] = useState(false);

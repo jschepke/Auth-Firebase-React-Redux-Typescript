@@ -17,9 +17,9 @@ import {
 } from '../../services/firebase/firebase';
 import { RootState } from '../../store';
 import { consoleLogger } from '../../utils/consoleLogger';
-import { viteMode } from '../../utils/viteMode';
+import { getCurrentViteMode } from '../../utils/getCurrentViteMode';
 
-const log = consoleLogger(viteMode, 'authSlice.ts');
+const log = consoleLogger(getCurrentViteMode(), 'authSlice.ts');
 
 /**------------------------------------------------------------------------
  *#                                TYPES
