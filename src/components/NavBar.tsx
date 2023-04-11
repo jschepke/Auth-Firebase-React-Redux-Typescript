@@ -5,6 +5,7 @@ import { Button, IconButton, Link, Menu, MenuItem, Stack } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import { Container } from '@mui/system';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink, useMatch } from 'react-router-dom';
@@ -21,7 +22,7 @@ import useAuth from '../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
 import { type Paths, paths } from '../routes/paths';
 import { consoleLogger } from '../utils/consoleLogger';
-import { viteMode } from '../utils/viteMode';
+import { getCurrentViteMode } from '../utils/getCurrentViteMode';
 
 interface NavLinkProps {
   path: Paths;
@@ -117,7 +118,7 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
 
-  const cl = consoleLogger(viteMode, 'NavBar.tsx');
+  const cl = consoleLogger(getCurrentViteMode(), 'NavBar.tsx');
 
   const renderNavLinks = Object.values(paths).map((path) => (
     <NavLink key={path} path={path} />
@@ -134,18 +135,20 @@ export default function Navbar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
-        <Toolbar>
-          <Stack spacing={1} direction="row" flexGrow={1}>
-            {renderNavLinks}
-          </Stack>
-          {user && (
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
-          )}
-          <ToggleColorMode />
-          <SelectLang />
-        </Toolbar>
+        <Container maxWidth="xl">
+          <Toolbar sx={{ minWidth: 'sm' }}>
+            <Stack spacing={1} direction="row" flexGrow={1}>
+              {renderNavLinks}
+            </Stack>
+            {user && (
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            )}
+            <ToggleColorMode />
+            <SelectLang />
+          </Toolbar>
+        </Container>
       </AppBar>
     </Box>
   );
