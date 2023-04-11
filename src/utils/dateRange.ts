@@ -1,5 +1,10 @@
 import { DateTime } from 'luxon';
 
+import { isValidRefDate } from './isValidRefDate';
+import { isValidWeekday } from './isValidWeekday';
+import { validateRefDate } from './validateRefDate';
+import { validateRefWeekday } from './validateRefWeekday';
+
 export enum Weekday {
   Monday = 1,
   Tuesday,
@@ -11,14 +16,14 @@ export enum Weekday {
 }
 
 /**
- * TODO add detailed description how to use config
+ * Options for the DateRange methods.
  */
-interface DateRangeConfig {
+interface DateRangeOptions {
   /**
    * Reference date for the range to be returned.
-   * @remarks default to `current date`
+   * @remarks default to current time.
    *
-   * @example
+   * @example //TODO
    * ```
    * new DateRange().week({ refDate: DateTime.fromISO('2023-05-15') });
    * ```
@@ -28,9 +33,9 @@ interface DateRangeConfig {
   /**
    * The weekday to be used as the first day of a week range.
    *
-   *@remarks Default to Monday.
+   *@remarks default to Monday.
    *
-   *@example
+   *@example //TODO
    * ```
    * // the range will start from Sunday
    * new DateRange().week({refDate: someDate, refWeekday: Weekday.Sunday });
@@ -51,16 +56,16 @@ interface DateRangeConfig {
 }
 
 // TODO
-interface IDateRange {
+/* interface IDateRange {
   dates: DateTime[];
   getLuxonDates(): DateTime[];
   toMilliseconds(): number[];
-  eachDayOfWeek(config?: DateRangeConfig): DateRange;
-  eachDayOfMonth(config?: DateRangeConfig): DateRange;
-}
+  eachDayOfWeek(config?: DateRangeOptions): DateRange;
+  eachDayOfMonth(config?: DateRangeOptions): DateRange;
+} */
 
 export class DateRange {
-  //TODO implement better suited interface to implement class
+  //TODO add an interface so the class can implement it
 
   /**
    * @remarks Default value for DateRange instance, equals to current time.
@@ -73,7 +78,7 @@ export class DateRange {
   private _refWeekday: Weekday;
 
   /**
-   * Instance dates storage.
+   * Instance date storage.
    */
   private _dates: DateTime[];
 
@@ -101,51 +106,31 @@ export class DateRange {
 
   /*================================ VALIDATION METHODS ==============================*/
 
-  public isValidDateRef(refDate: unknown): boolean {
-    return this._isValidDateRef(
-      this._isValidDate(refDate),
-      this._isValidDateTime(refDate)
-    );
+  //TODO adjust info about re-export when the lib is ready
+  /**
+   * Checks if a given value is a valid reference date.
+   *
+   * @remarks A reference date can be either a `Date` object or a `DateTime` object.
+   * This function is re-exported from utilities module for convenience of use.
+   *
+   * @param refDate - The value to check.
+   * @returns True if the value is a valid reference date, false otherwise.
+   */
+  public isValidRefDate(refDate: unknown): boolean {
+    return isValidRefDate(refDate);
   }
 
-  private _validateRefDate(refDate: unknown): void {
-    if (!this.isValidDateRef(refDate)) {
-      throw new Error(
-        `Invalid date. Date must be typeof Date or to be valid Luxon DateTime`
-      );
-    }
-  }
-
-  private _isValidDateRef(
-    isValidDate: boolean,
-    isValidDateTime: boolean
-  ): boolean {
-    if (isValidDate || isValidDateTime) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  private _isValidDateTime(date: unknown): date is DateTime {
-    if (date instanceof DateTime && date.isValid) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  private _isValidDate(date: unknown): date is Date {
-    if (!(date instanceof Date)) {
-      return false;
-    }
-
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-      return false;
-    }
-
-    return true;
+  //TODO adjust info about re-export when the lib is ready
+  /**
+   * Checks if a weekday is a number from 1 to 7.
+   *
+   * @remarks This function is re-exported from utilities module for convenience of use.
+   *
+   * @param weekday - The weekday to check.
+   * @returns True if weekday is a number from 1 to 7, false otherwise.
+   */
+  public isValidRefWeekday(weekday: unknown): boolean {
+    return isValidWeekday(weekday);
   }
 
   /*================================ CONVERTING METHODS ==============================*/
@@ -203,21 +188,22 @@ export class DateRange {
   /**
    * Creates a date for each day of a week range related to reference date.
    *
-   * By default, the range starts on Monday before or at the reference date.
+   * By default, the range starts on Monday before or on the reference date.
    * Each date starts at its beginning.
    *
-   * The date range can be specified by passing a `config` object.
+   * The date range can be specified by passing an `options` object.
    *
-   * @param config - {@link DateRangeConfig}
+   * @param options - {@link DateRangeOptions}
    * @returns The `DateRange` instance with the dates array populated.
    *
    * @example //TODO
    */
-  eachDayOfWeek(config?: DateRangeConfig) {
+  eachDayOfWeek(options?: DateRangeOptions): DateRange {
     const { refDate = this._refDate, refWeekday = this._refWeekday } =
-      config || {};
+      options || {};
 
-    this._validateRefDate(refDate);
+    validateRefWeekday(refWeekday);
+    validateRefDate(refDate);
 
     // Set date at the beginning of a day
     let firstDate: DateTime;
