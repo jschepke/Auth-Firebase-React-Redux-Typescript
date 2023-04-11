@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { getRandomWeekday } from './getRandomWeekday';
+import { getRandomWeekday } from '../getRandomWeekday';
 
 describe('getRandomWeekday', () => {
   test('returns a number between 1 and 7, inclusive', () => {

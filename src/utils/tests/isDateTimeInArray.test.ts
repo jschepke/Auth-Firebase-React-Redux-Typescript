@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { isDateTimeInArray } from './isDateTimeInArray';
+import { isDateTimeInArray } from '../isDateTimeInArray';
 
 // Define some sample dates and arrays for testing
 const date1 = DateTime.fromISO('2021-01-01');
@@ -38,12 +38,14 @@ describe('isDateTimeInArray', () => {
   });
 
   test('error is thrown for invalid date', () => {
+    // @ts-expect-error: testing invalid input
     expect(() => isDateTimeInArray('2021-01-01', array1)).toThrow(
       'Invalid date'
     );
   });
 
   test('error is thrown for invalid array', () => {
+    // @ts-expect-error: testing invalid input
     expect(() => isDateTimeInArray(date1, ['2021-01-01'])).toThrow(
       'Invalid array'
     );
