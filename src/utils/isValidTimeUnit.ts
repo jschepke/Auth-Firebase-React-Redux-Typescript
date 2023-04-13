@@ -1,5 +1,26 @@
 import { Duration, DurationUnit } from 'luxon';
 
+export const durationUnitKeys: DurationUnit[] = [
+  'day',
+  'days',
+  'hour',
+  'hours',
+  'millisecond',
+  'milliseconds',
+  'minute',
+  'minutes',
+  'month',
+  'months',
+  'quarter',
+  'quarters',
+  'second',
+  'seconds',
+  'week',
+  'weeks',
+  'year',
+  'years',
+];
+
 /**
  * Checks if a given value is a valid DurationUnit.
  *

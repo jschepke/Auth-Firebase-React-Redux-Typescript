@@ -1,28 +1,6 @@
-import { DurationUnit } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { isValidTimeUnit } from '../isValidTimeUnit';
-
-const durationUnitKeys: DurationUnit[] = [
-  'day',
-  'days',
-  'hour',
-  'hours',
-  'millisecond',
-  'milliseconds',
-  'minute',
-  'minutes',
-  'month',
-  'months',
-  'quarter',
-  'quarters',
-  'second',
-  'seconds',
-  'week',
-  'weeks',
-  'year',
-  'years',
-];
+import { durationUnitKeys, isValidTimeUnit } from '../isValidTimeUnit';
 
 describe('isValidTimeUnit', () => {
   // test valid time units
