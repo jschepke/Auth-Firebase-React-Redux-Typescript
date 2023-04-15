@@ -265,8 +265,8 @@ describe('extendRange', () => {
         // original array to the first element of the extended range
         for (let i = firstIndex; i > 0; i--) {
           // check if the current element equals to the previous element plus one unit of time
-          expect(extendedRange[i]).toEqual(
-            extendedRange[i - 1].plus({ [timeUnit]: 1 })
+          expect(extendedRange[i].valueOf()).toEqual(
+            extendedRange[i - 1].plus({ [timeUnit]: 1 }).valueOf()
           );
         }
       }

@@ -5,6 +5,13 @@ import { isNumber } from './isNumber';
 import { isValidDateTimeArray } from './isValidDateTimeArray';
 import { isValidTimeUnit } from './isValidTimeUnit';
 
+export function validateOffset(name: string, value: unknown) {
+  // if the value is not a number or is negative, throw an error
+  if (!isNumber(value) || (isNumber(value) && value < 0)) {
+    throw new ValidationError(name, value, `a valid number >= 0`);
+  }
+}
+
 /**
  * Options for `extendRange` function.
  */
@@ -53,19 +60,10 @@ export function extendRange(options: ExtendRangeOptions): DateTime[] {
     );
   }
 
-  // validate startOffset value
-  if (!isNumber(startOffset) || (isNumber(startOffset) && startOffset < 0)) {
-    throw new ValidationError(
-      'startOffset',
-      startOffset,
-      `a valid number >= 0`
-    );
-  }
-
-  // validate endOffset value
-  if (!isNumber(endOffset) || (isNumber(endOffset) && endOffset < 0)) {
-    throw new ValidationError('endOffset', endOffset, `a valid number >= 0`);
-  }
+  // validate offsets
+  Object.entries({ startOffset, endOffset }).forEach(([name, value]) => {
+    validateOffset(name, value);
+  });
 
   // validate timeUnit value
   if (!isValidTimeUnit(timeUnit)) {
