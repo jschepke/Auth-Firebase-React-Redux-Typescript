@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { isDateTimeInArray } from '../isDateTimeInArray';
+import { isDateTimeInArray } from '../../src/utils/isDateTimeInArray';
 
 // Define some sample dates and arrays for testing
 const date1 = DateTime.fromISO('2021-01-01');

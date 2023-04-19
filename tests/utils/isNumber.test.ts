@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { isNumber } from '../isNumber';
+import { isNumber } from '../../src/utils/isNumber';
 
 describe('isNumber', () => {
   test('should return true for inputs that are valid numbers', () => {

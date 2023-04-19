@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { isValidRefDate } from '../isValidRefDate';
+import { isValidRefDate } from '../../src/utils/isValidRefDate';
 
 describe('isValidRefDate', () => {
   test('should return true for valid Date objects', () => {

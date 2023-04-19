@@ -1,8 +1,8 @@
 import { DateTime, DurationUnit } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { extendRange } from '../extendRange';
-import { durationUnitKeys } from '../isValidTimeUnit';
+import { extendRange } from '../../../src/utils/date_range/extendRange';
+import { durationUnitKeys } from '../../../src/utils/isValidTimeUnit';
 
 describe('extendRange', () => {
   describe('general functionality', () => {

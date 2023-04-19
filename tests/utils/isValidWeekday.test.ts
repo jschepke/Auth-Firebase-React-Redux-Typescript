@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { isValidWeekday } from '../isValidWeekday';
+import { isValidWeekday } from '../../src/utils/isValidWeekday';
 
 describe('isValidWeekday', () => {
   test('should return true for valid weekdays', () => {

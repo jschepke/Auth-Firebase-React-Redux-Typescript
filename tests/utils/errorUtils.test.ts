@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { ValidationError } from '../errorUtils';
+import { ValidationError } from '../../src/utils/errorUtils';
 
 describe('CustomError', () => {
   describe('ValidationError', () => {

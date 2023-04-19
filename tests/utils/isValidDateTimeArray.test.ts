@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { isValidDateTimeArray } from '../isValidDateTimeArray';
+import { isValidDateTimeArray } from '../../src/utils/isValidDateTimeArray';
 
 // some valid and invalid DateTime objects for testing
 const validDate1 = DateTime.local(2021, 12, 25);

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { describe, expect, test } from 'vitest';
 
-import { getRandomDateTime } from '../getRandomDateTime';
+import { getRandomDateTime } from '../../src/utils/getRandomDateTime';
 
 describe('getRandomDateTime', () => {
   // Test that the function returns a valid DateTime object

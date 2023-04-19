@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { durationUnitKeys, isValidTimeUnit } from '../isValidTimeUnit';
+import {
+  durationUnitKeys,
+  isValidTimeUnit,
+} from '../../src/utils/isValidTimeUnit';
 
 describe('isValidTimeUnit', () => {
   // test valid time units
