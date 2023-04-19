@@ -4,13 +4,10 @@ import { isNumber } from '../isNumber';
 import { isObject } from '../isObject';
 import { isValidRefDate } from '../isValidRefDate';
 import { isValidWeekday } from '../isValidWeekday';
+import { PropertiesMap } from '../types/utilityTypes';
 import { DateRangeOptions } from './dateRange';
 
-type DateRangeOptionsKeysMap = {
-  [Key in keyof Required<DateRangeOptions>]: Key;
-};
-
-const dateRangeOptionsKeysMap: DateRangeOptionsKeysMap = {
+const dateRangeOptionsKeysMap: PropertiesMap<DateRangeOptions> = {
   endOffset: 'endOffset',
   refDate: 'refDate',
   refWeekday: 'refWeekday',
