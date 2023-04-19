@@ -1,10 +1,11 @@
 import { DateTime, DurationUnit } from 'luxon';
 
-import { ValidationError } from './errorUtils';
-import { isNumber } from './isNumber';
-import { isValidDateTimeArray } from './isValidDateTimeArray';
-import { isValidTimeUnit } from './isValidTimeUnit';
+import { ValidationError } from '../errorUtils';
+import { isNumber } from '../isNumber';
+import { isValidDateTimeArray } from '../isValidDateTimeArray';
+import { isValidTimeUnit } from '../isValidTimeUnit';
 
+// Todo extract all validations for ExtendRangeOptions into separate function
 export function validateOffset(name: string, value: unknown) {
   // if the value is not a number or is negative, throw an error
   if (!isNumber(value) || (isNumber(value) && value < 0)) {
@@ -15,7 +16,7 @@ export function validateOffset(name: string, value: unknown) {
 /**
  * Options for `extendRange` function.
  */
-interface ExtendRangeOptions {
+export interface ExtendRangeOptions {
   /**
    * The range of DateTime objects to extend.
    */
