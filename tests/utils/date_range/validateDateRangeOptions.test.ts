@@ -6,8 +6,8 @@ import {
   Weekday,
 } from '../../../src/utils/date_range/dateRange';
 import { validateDateRangeOptions } from '../../../src/utils/date_range/validateDateRangeOptions';
-import { isNumber } from '../../../src/utils/isNumber';
 import { isObject } from '../../../src/utils/isObject';
+import { isValidOffset } from '../../../src/utils/isValidOffset';
 import { isValidWeekday } from '../../../src/utils/isValidWeekday';
 
 describe('validateDateRangeOptions', () => {
@@ -17,6 +17,7 @@ describe('validateDateRangeOptions', () => {
     { invalidInput: [] },
     { invalidInput: {} },
     { invalidInput: 1 },
+    { invalidInput: 2.5 },
     { invalidInput: -1 },
     { invalidInput: [1] },
     { invalidInput: 'test' },
@@ -26,16 +27,31 @@ describe('validateDateRangeOptions', () => {
     { invalidInput: false },
   ];
 
-  describe('Given no input', () => {
-    test('throws an error if input is not specified', () => {
+  const validDateRangeOptions: DateRangeOptions = {
+    endOffset: 2,
+    startOffset: 1,
+    refDate: DateTime.fromISO('2021-01-01'),
+    refWeekday: 2,
+  };
+
+  describe('Given no input to the function itself', () => {
+    test('throws an error if value parameter is not specified', () => {
       // @ts-expect-error: testing invalid input
       expect(() => validateDateRangeOptions()).toThrowError();
     });
   });
 
-  describe('Given a non-object as input', () => {
+  // test for no arguments passed for validation
+  describe('Given undefined parameter input (no arguments passed for validation)', () => {
+    test("doesn't return anything", () => {
+      expect(validateDateRangeOptions(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('Given a non-object as input, except undefined', () => {
     const nonObjectValues = invalidInputValues.filter(
-      (value) => !isObject(value.invalidInput)
+      (value) =>
+        !isObject(value.invalidInput) && value.invalidInput !== undefined
     );
     test.each(nonObjectValues)(
       'throws an error if input is $invalidInput',
@@ -79,7 +95,10 @@ describe('validateDateRangeOptions', () => {
           `doesn't throw error if refDate is $description`,
           (item) => {
             expect(() =>
-              validateDateRangeOptions({ refDate: item.value })
+              validateDateRangeOptions({
+                ...validDateRangeOptions,
+                refDate: item.value,
+              })
             ).not.toThrowError();
           }
         );
@@ -149,11 +168,10 @@ describe('validateDateRangeOptions', () => {
   describe('Offset properties', () => {
     const invalidOffsetValues = invalidInputValues.filter(
       (item) =>
-        !(isNumber(item.invalidInput) && item.invalidInput > 0) &&
-        item.invalidInput !== undefined
+        !isValidOffset(item.invalidInput) && item.invalidInput !== undefined
     );
 
-    const validOffsetValues = [1, 123];
+    const validOffsetValues = [0, 1, 123];
 
     describe('startOffset property', () => {
       describe('Given a valid startOffset', () => {
@@ -161,7 +179,10 @@ describe('validateDateRangeOptions', () => {
           "doesn't throw error if startOffset is %d",
           (num) => {
             expect(() =>
-              validateDateRangeOptions({ startOffset: num })
+              validateDateRangeOptions({
+                ...validDateRangeOptions,
+                startOffset: num,
+              })
             ).not.toThrowError();
           }
         );
@@ -172,7 +193,10 @@ describe('validateDateRangeOptions', () => {
           'throws an error if startOffset is $invalidInput',
           ({ invalidInput }) => {
             expect(() =>
-              validateDateRangeOptions({ startOffset: invalidInput })
+              validateDateRangeOptions({
+                ...validDateRangeOptions,
+                startOffset: invalidInput,
+              })
             ).toThrowError();
           }
         );
@@ -185,7 +209,10 @@ describe('validateDateRangeOptions', () => {
           "doesn't throw error if endOffset is %d",
           (num) => {
             expect(() =>
-              validateDateRangeOptions({ endOffset: num })
+              validateDateRangeOptions({
+                ...validDateRangeOptions,
+                endOffset: num,
+              })
             ).not.toThrowError();
           }
         );
@@ -214,21 +241,24 @@ describe('validateDateRangeOptions', () => {
           startOffset: 1,
         },
         {
+          refDate: DateTime.now(),
           refWeekday: Weekday.Monday,
           startOffset: 2,
+          endOffset: 6,
         },
         {
-          refDate: new Date(2021, 11, 25), // replaced with JS Date object
+          refWeekday: 3,
+          refDate: new Date(2021, 11, 25),
           endOffset: 5,
-        },
-        {
-          endOffset: 0,
           startOffset: 0,
         },
         {
-          refDate: DateTime.now().plus({ days: 2 }),
-          refWeekday: Weekday.Friday,
+          refDate: DateTime.fromObject({ year: 2025, month: 3, day: 30 }),
+          refWeekday: 5,
+          endOffset: 0,
+          startOffset: 0,
         },
+
         {
           refDate: new Date(2022, 0, 1), // replaced with JS Date object
           refWeekday: Weekday.Sunday,
@@ -236,22 +266,17 @@ describe('validateDateRangeOptions', () => {
           startOffset: 2,
         },
         {
+          refDate: new Date(2018, 4, 1),
           refWeekday: Weekday.Wednesday,
           endOffset: 3,
-        },
-        {
-          refDate: DateTime.now().minus({ days: 2 }),
-          startOffset: 1,
+          startOffset: 0,
         },
       ];
 
-      test.each(validInputs)(
-        `doesn't throw errors or return anything for %s`,
-        (input) => {
-          expect(() => validateDateRangeOptions(input)).not.toThrowError();
-          expect(validateDateRangeOptions(input)).toBeUndefined();
-        }
-      );
+      test.each(validInputs)(`doesn't return anything for %s`, (input) => {
+        expect(() => validateDateRangeOptions(input)).not.toThrowError();
+        expect(validateDateRangeOptions(input)).toBeUndefined();
+      });
     });
 
     describe('Given an object with mixed expected and unexpected properties', () => {
