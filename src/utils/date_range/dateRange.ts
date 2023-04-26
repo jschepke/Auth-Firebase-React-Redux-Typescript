@@ -228,15 +228,14 @@ export class DateRange {
    * @example //TODO
    */
   public eachDayOfWeek(options?: DateRangeOptions): DateRange {
+    validateDateRangeOptions(options);
+
     const {
       refDate = this._refDate,
       refWeekday = this._refWeekday,
       startOffset = this._startOffset,
       endOffset = this._endOffset,
     } = options || {};
-
-    // validate input
-    validateDateRangeOptions({ refDate, refWeekday, startOffset, endOffset });
 
     // Set date at the beginning of a day
     let firstDayOfRange: DateTime;
@@ -279,15 +278,14 @@ export class DateRange {
 
   //TODO
   public eachDayOfMonth(options?: DateRangeOptions): DateRange {
+    validateDateRangeOptions(options);
+
     const {
       refDate = this._refDate,
       refWeekday = this._refWeekday,
       startOffset = this._startOffset,
       endOffset = this._endOffset,
     } = options || {};
-
-    // validate input
-    validateDateRangeOptions({ refDate, refWeekday, startOffset, endOffset });
 
     // Set the fist date of month
     let firstDayOfMonth: DateTime;
